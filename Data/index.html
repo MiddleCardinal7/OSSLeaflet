@@ -1,0 +1,3352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5E212BKX6N"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-5E212BKX6N');
+</script>
+<title>One-Stop-Shop for Rural Traveler Information</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta http-equiv="cache-control" content="max-age=0" />
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="expires" content="0" />
+<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+<meta http-equiv="pragma" content="no-cache" />
+<link rel="apple-touch-icon" sizes="57x57" href="./appicons/apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="./appicons/apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="./appicons/apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="./appicons/apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="./appicons/apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="./appicons/apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="./appicons/apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="./appicons/apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="./appicons/apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192"  href="./appicons/android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="./appicons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="./appicons/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./appicons/favicon-16x16.png">
+<link rel="manifest" href="./appicons/manifest.json">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="./appicons/ms-icon-144x144.png">
+<meta name="theme-color" content="#ffffff">
+<link rel="shortcut icon" href="./appicons/favicon.ico" type="image/x-icon">
+<link rel="icon" href="./appicons/favicon.ico" type="image/x-icon">
+<link rel="stylesheet" type="text/css" href="style.css">
+<script src="https://www.google.com/jsapi" type="text/javascript"></script>
+<script>
+// This script is organized into several sections. 
+// Sections start with //******* Section ************// 
+// and end with        //******* End Section ********//
+// The order is as follows:
+// Global Variables
+// Utility Functions
+// Initial Load Functions
+// Marker Functions
+// Road Travel Conditions Menu Items
+// Current Weather Menu Items
+// Forecast Weather Menu Items
+// Fire Menu Items
+// Other Info Menu Items
+// Menu Controls
+
+//********************************************* Global Variables ***********************************************//
+// Global Variables start with a capital (except map) while all local variables start with lower
+
+// The map  This has to be lowercase because otherwise it interferes with the built in javascript function Map
+var map;
+
+// The InfoWindow
+var InfoWindow;
+
+//***** Road/Travel Conditions
+// List of active layers for Road/Travel Conditions
+var RoadTravelConditionsActiveLayers = {Incident:false, 
+					Chain:false, 
+					CCTV:false,
+					CMS:false,
+					RWIS:false, 
+					RoadInfo:false,
+					Traffic:false,
+					Weather:false};
+
+// List of layers that are in markers. true means they are in. 
+var RoadTravelConditionsMarkersGenerated = {Incident:false, 
+											Chain:false, 
+											CCTV:false,
+											CMS:false,
+											RWIS:false, 
+											RoadInfo:false};
+
+// JSON is loaded into these arrays, if they are null it means that the json is not loaded. false means they failed to load
+// Road/Travel Condition Arrays
+var RoadTravelConditionsArrays =   {Chain:null,
+									Incident:null, 
+									CCTV:null,
+									CMS:null,
+									RWIS:null, 
+									RoadInfo:null,
+									Traffic:null};  // not actually an array, but it's better orginized when stored in here
+
+//***** Current Weather
+// Current Weather Arrays, null is not loaded yet, false means they failed to load.
+var CurrentWeatherArrays = {CurrentAirTemperature:null,
+							Humidity:null,
+							Precipitation1hour:null,
+							Precipitationt24hour:null,
+							AHPS:null,
+							Wind:null};
+
+// Currently Selected Weather Layer
+var CurrentWeatherLayer = null;
+
+//***** Forecast Weather
+// Forecast Weather Arrays, null is not loaded yet, false means they failed to load.
+var ForecastWeatherArrays = {ForecastAirTemperature:null,
+							 WindSpeed:null,
+							 WindGustSpeed:null,
+							 ForecastHumidity:null,
+							 SkyCover:null,
+							 Precipitation12hour:null,
+							 Precipitation6hour:null,
+							 Snow:null,
+							 Weather:null};
+
+// Inner HTML for the time selector on Forecast Weather
+var ForecastTimeHTML = {ForecastAirTemperature:null,
+						WindSpeed:null,
+						WindGustSpeed:null,
+						ForecastHumidity:null,
+						SkyCover:null,
+						Precipitation12hour:null,
+						Precipitation6hour:null,
+						Snow:null,
+						Weather:null};
+						
+// JSON for the forecast weather layers
+var ForecastMarkers =  {ForecastAirTemperature:{},
+						WindSpeed:{},
+						WindGustSpeed:{},
+						ForecastHumidity:{},
+						SkyCover:{},
+						Precipitation12hour:{},
+						Precipitation6hour:{},
+						Snow:{},
+						Weather:{}};
+
+// Currently selected Forecast Weather Layer
+var ForecastWeatherLayer = null;
+
+// Curretly selected time for forecast layers
+var ForecastWeatherLayerAndTime = null;
+
+//***** Fire
+// Arrays for Fire layers, null is not loaded yet, false means they failed to load.
+var FireArrays = {FireIncidents:null,
+				  FireDetectors:null};
+
+// Currently Selected Fire Layer
+var FireLayer = null;
+
+//***** Other Info
+// Arrays for all Other Info Layers, null is not loaded yet, false means they failed to load.
+var OtherInfoArrays = {	RestAreas:null,
+						FeaturesOfInterest:null, 
+						TruckScales:null,
+						SummitLocations:null};
+
+var OtherInfoMarkersGenerated = {	RestAreas:false,
+									FeaturesOfInterest:false, 
+									TruckScales:false,
+									SummitLocations:false};
+
+// JSON for all Road/Travel Condition Layers
+var OtherInfoActiveLayers =   {RestAreas:true,
+								FeaturesOfInterest:false, 
+								TruckScales:false,
+								SummitLocations:false};
+
+//*****
+// Array of markers of all types.
+var Markers = new Array();
+
+// The index of the current selected marker.
+var CurrentIndex = -1;
+
+// The minimum z-index of the markers. Every time a marker is closed, this decrements by 1. 
+// This should be initialized at the lowest hardcoded z-index for the markers.
+var MinZindex = 1000;
+
+// Map loaded.
+var MapLoaded = false;
+
+// ID for CheckJSONandMapload()
+var TimerID = -1;
+
+// ID for SlowLoad()
+var TimeoutID = -1;
+
+// Ground Overlay for Weather
+var WxOverlay;
+
+// Is the infowindow sticky - opened by click?
+var StickyWindowOpen = false;
+
+// Variable for the menu
+var MenuVariable = "RoadTravelConditions";
+
+// Zoom levels this corralates to markers.properties.zoom from the json files
+var ZoomLevels = [6,7,8,9,10,11,12,13];
+
+// Tells if the legend is open
+var LegendVariable = true;
+
+// Which legend is selected
+var LegendVar = "RoadTravelConditions";
+
+// timing variable for analytics
+var roadTravelConditionsInitialStart = (new Date().getTime() / 1000);
+
+// Makes it keep current url when first loaded. This is to prevent presisted layers from a reload form getting overwritten.
+var Firstload = true;
+
+// Index value for the markers in RoadTravelConditions and the OtherInfo layers.  
+// This is so that the markers don't remove the other markers in the same group, but rather get added after them in the Marker array.
+var groupindex = 0;
+
+//This variable helps with the analytics code
+var inFocus = true;
+//******************************************* End Global Variables *****************************************//
+
+//****************************************** Utility functions ********************************************//
+//This function helps with google analytics code
+function handleVisibilityChange() {
+    if (!(document.hidden)) {
+        inFocus = false;
+    }
+}
+document.addEventListener("visibilitychange", handleVisibilityChange, false);
+
+// Google analytics function
+function LogAnalyticsEvent(eventCategory, eventAction, eventLabel) {
+	ga('send', {
+		hitType: 'event',
+		eventCategory: eventCategory,
+		eventAction: eventAction,
+		eventLabel: eventLabel
+	});
+	if (eventCategory == "Marker") {
+		gtag('event', 'OSS_Marker', {'OSS_elementtype':eventAction , 'OSS_location':eventLabel });
+	}
+	if (eventCategory == "Link") {
+		gtag('event', 'OSS_Link', {'OSS_linktype':eventAction , 'OSS_location':eventLabel });
+	}
+	if (eventCategory == "Load") {
+		gtag('event', 'OSS_Load', {'OSS_href':eventAction , 'OSS_location':eventLabel });
+	}
+	if (eventCategory == "Layer") {
+		gtag('event', 'OSS_Layer', {'OSS_layer':eventAction , 'OSS_status':eventLabel });
+	}
+	if (eventCategory == "LoadTime") {
+		gtag('event', 'OSS_LoadTime', {'OSS_element':eventAction , 'OSS_time':eventLabel });
+	}
+	if (eventCategory == "UI") {
+		gtag('event', 'OSS_UI', {'OSS_element':eventAction , 'OSS_status':eventLabel });
+	}
+	if (eventCategory == "TimeSelect") {
+		gtag('event', 'OSS_TimeSelect', {'OSS_layer':eventAction , 'OSS_time':eventLabel });
+	}
+	if (eventCategory == "FailedLayerLoad") {
+		gtag('event', 'OSS_FailedLayerLoad', {'OSS_layer':eventAction});
+	}
+	if (eventCategory == "Zoom") {
+		gtag('event', 'OSS_Zoom', {'OSS_location':eventLabel});
+	}
+	if (eventCategory == "addthis") {
+		gtag('event', 'OSS_addthis', {'OSS_service':eventAction , 'OSS_href':eventLabel });
+	}
+}
+
+// This sets the current location and layers into the url. This is so the layers keep the same after a reload/share. it also deals with the addthis-addon.
+function setURLAndCookies(){
+	try {
+		var center = map.getCenter();
+		var lat = Math.round(center.lat()*100000)/100000;
+		var lng = Math.round(center.lng()*100000)/100000;
+		var zoom = map.getZoom();
+		var stateObj = { oss: "oss" };
+		hasaddthis = true;
+		addthisinfo = "";
+		try{
+			addthisinfo = /(#.+)/.exec(window.location.href)[1];
+		} catch (e){
+			hasaddthis = false;
+		}
+		var filename = window.location.origin + "/";
+		var url = filename + "?clat="+lat+"&clng="+lng+"&zoom="+zoom;
+		history.replaceState(stateObj, "OSS Mobile", url + addthisinfo);
+		//addthis.update('share', 'url', url);
+		//window.addthis.url = url;
+		setCookie("clat",lat);
+		setCookie("clng",lng);
+		setCookie("zoom",zoom);
+		// Appears to be deprecated	
+                //window.addthis.layers.refresh();
+	}
+	catch(err) {
+	
+	}
+}
+
+//Function is not used
+//// Adds the addthisscripts after the dom element is added in init
+//function addthisscripts(){
+//	setTimeout(function() {
+//		var addthis_script = document.createElement('script');
+//		addthis_script.type = "text/javascript";
+//		addthis_script.src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-50b69ccd50634cf9";
+//		addthis_script.onload = function(){// Logs the add this share event
+//			addthis.addEventListener('addthis.menu.share',function(e){
+//				LogAnalyticsEvent("AddThis",e.data.service,window.location.href);
+//			});
+//		}
+//		document.body.appendChild(addthis_script);
+//	}, 1000);
+//}
+
+//date object functions to make formatting a date easier
+Date.prototype.getDayName = function () {
+	return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][this.getDay()];
+};
+
+Date.prototype.getMonthName = function () {
+	return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+			'Oct', 'Nov', 'Dec'][this.getMonth()];
+};
+
+Date.prototype.getMinute = function () {
+	return ((String(this.getMinutes()).length > 1) ?
+			String(this.getMinutes()) : '0' + String(this.getMinutes()));
+};
+
+Date.prototype.getHour = function () {
+	if (this.getHours() === 0) {
+		return "12";
+	} else {
+		return (String((this.getHours() > 12) ?
+						this.getHours() - 12 : this.getHours()));
+	}
+};
+
+Date.prototype.getAMPM = function () {
+	return (this.getHours() >= 12) ? "PM" : "AM";
+};
+
+Date.prototype.stdOffset = function () {
+	return Math.max((new Date(this.getFullYear(), 0, 1)).getTimezoneOffset(),
+					(new Date(this.getFullYear(), 6, 1)).getTimezoneOffset());
+};
+
+Date.prototype.isDST = function () {
+	return this.getTimezoneOffset() < this.stdOffset();
+};
+
+Date.prototype.getTimezoneName = function () {
+	if (this.isDST()) {
+		return ['UTC', 0, 0, 'ADT', 'EDT', 'CDT', 'MDT', 'PDT',
+				'AKDT', 'HADT', 'SDT'][this.getTimezoneOffset() / 60];
+	} else {
+		return ['UTC', 0, 0, 0, 'AST', 'EST', 'CST', 'MST', 'PST',
+				'AKST', 'HAST', 'SST'][this.getTimezoneOffset() / 60];
+	}
+};
+
+Date.prototype.getFormattedTime = function () {
+	return this.getHour() + ":" + this.getMinute() + " " + this.getAMPM();
+};
+
+//formats a date as HH:MM [AM|PM] TZ mmm dd yyyy
+formatDate = function (timestring) {
+	timestring = timestring.toString();
+	var dt = new Date(Date.UTC(timestring.slice(0, 4),
+								timestring.slice(4, 6) - 1,
+								timestring.slice(6, 8),
+								timestring.slice(8, 10),
+								timestring.slice(10, 12)));
+	
+	return (dt.getFormattedTime() + ' ' +
+			dt.getTimezoneName() + ', ' +
+			//dt.getDayName() + ', ' +
+			dt.getMonthName() + ' ' +
+			String(dt.getDate()) + ' ' +
+			String(dt.getFullYear()));
+};
+
+//formats a date as HH[AM|PM] TZ, ddd, mm/dd/yyyy
+formatDate2 = function (timestring) {
+	timestring = timestring.toString();
+	var dt = new Date(Date.UTC(timestring.slice(0, 4),
+								timestring.slice(4, 6) - 1,
+								timestring.slice(6, 8),
+								timestring.slice(8, 10),
+								timestring.slice(10, 12)));
+	
+	return (dt.getHour() + dt.getAMPM() + " " +
+			dt.getTimezoneName() + ", " +
+			dt.getDayName() + " " +
+			String(dt.getMonth() + 1) + "/" +
+			String(dt.getDate()) + "/" +
+			String(dt.getFullYear()));
+};
+
+// *** Adapted from: http://www.w3schools.com/js/js_cookies.asp
+function setCookie(cname,cvalue) {
+	var expires = "expires=Fri, 31 Dec 9999 23:59:59 GMT";
+	document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) {
+	var name = cname + "=";
+	var ca = document.cookie.split(';');
+	for(var i = 0; i < ca.length; i++) {
+		var c = ca[i];
+		while (c.charAt(0) == ' ') {
+			c = c.substring(1);
+		}
+		if (c.indexOf(name) == 0) {
+			return c.substring(name.length, c.length);
+		}
+	}
+	return "";
+}
+//************************************ End Utility Functions **********************************************//
+
+//*************************************** Initial load Functions ******************************************//
+// These functions are only used when the page loads the first time. 
+function LoadWeatherJSON() { // loads json for weather, then generates the options to put into the time selector.
+	document.getElementById("splash-panel").innerHTML += "<br>Retrieving Weather Forecast Data ...";
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.open("GET", "/data/FORECAST_WEATHER/wx.json", true);
+	xmlhttp.onreadystatechange = function() {
+		if (xmlhttp.readyState == 4) {
+			if(xmlhttp.status == 200){ // success
+				ForecastWeatherArrays["Weather"] = JSON.parse(xmlhttp.responseText);
+				document.getElementById("splash-panel").innerHTML += "<br>Done Downloading Weather Forecast Data ...";
+				
+				//adds options to the time selector
+				var weatherMenuHTML = "";
+				for (var i=0; i < ForecastWeatherArrays["Weather"].length; i++) {
+					var tempvar = "Weathermenu" + i.toString();
+					var tempvar2 = "Weather" + i.toString();
+					var tempvar3 = "Weather" + i.toString() + "Button";
+					weatherMenuHTML += '<option id=' + tempvar + '" value="'+ForecastWeatherArrays["Weather"][i].toString()+'" >' + formatDate2(ForecastWeatherArrays["Weather"][i].toString()) + '</option>';
+				}
+				ForecastTimeHTML["Weather"] = weatherMenuHTML;
+				var time = document.getElementById('time');
+				time.innerHTML = ForecastTimeHTML["Weather"];
+				ForecastWeatherTime = ForecastWeatherArrays["Weather"][0];
+				ForecastWeatherLayer = "Weather";
+				time.onchange = function() {
+					var timeObj = document.getElementById("time");
+					LogAnalyticsEvent('TimeSelect', 'Weather', ForecastWeatherArrays["Weather"][timeObj.selectedIndex]);
+					AddWeatherContent(false);
+				};
+				document.getElementById("WeatherStatus").className = "statusicon check";
+			} else{ // xmlhttprequest failed: disable weather buttons and time selector.
+				document.getElementById("splash-panel").innerHTML += "<br>Failed Downloading Weather Forecast Data ...";
+				document.getElementById("RoadTravelConditionsWeather").onclick = function(){
+					alert("Weather layer could not be loaded. Refresh the page to try agian.");
+				};
+				document.getElementById("RoadTravelConditionsWeather").className = "menuitem disabled";
+				document.getElementById("Weather").onclick = function(){
+					alert("Weather layer could not be loaded. Refresh the page to try agian.");
+				};
+				var time = document.getElementById('time');
+				time.onchange = function() {
+				};
+				document.getElementById("Weather").className = "menuitem disabled";
+				ForecastWeatherArrays["Weather"] = false;
+                                //Log analytics
+                                LogAnalyticsEvent("FailedLayerLoad", "Weather Forecast Overlay", "")
+			}
+		}
+	};
+	xmlhttp.send();
+}
+
+function LoadRoadTravelConditionsJSON(layer,url){ //generic function that is used to load indivuidal json files for the defulat layers in Roaad Travel Conditions.
+	var splash = document.getElementById("splash-panel")
+	splash.innerHTML += "<br>Retrieving "+ layer + " Data ...";
+	var tempaction = document.getElementById(layer).onclick;				
+	document.getElementById(layer).onclick = function(){ // Prevents the menu button from working again.
+		alert(layer + " layer could not be loaded. Refresh the page to try agian.");
+	};
+	document.getElementById(layer).className = "menuitem disabled";
+
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.open("GET", url, true);
+	xmlhttp.onreadystatechange = function() {
+		if (xmlhttp.readyState == 4){
+			if(xmlhttp.status == 200) { // Success
+				document.getElementById(layer).onclick = tempaction;	
+				document.getElementById(layer).className = "menuitem";
+				RoadTravelConditionsArrays[layer] = JSON.parse(xmlhttp.responseText)[0]; // sets the recieved json to the correct array 
+				splash.innerHTML += "<br>Done Downloading "+layer+" Data ...";
+			} else { // Failure
+				splash.innerHTML += "<br>Failed Downloading "+layer+" Data ...";
+				RoadTravelConditionsArrays[layer] = false;
+                                //Log analytics
+                                LogAnalyticsEvent("FailedLayerLoad", layer, "")
+			}
+		}
+	};
+	xmlhttp.send();
+}
+
+// These functions all just set the parameters of LoadRoadTravelConditionsJSON for each layer.
+function LoadCCTVJSON() {
+	LoadRoadTravelConditionsJSON("CCTV","/data/CCTV/OSS_cctv.json");
+}
+
+function LoadCMSJSON() {
+	LoadRoadTravelConditionsJSON("CMS","/data/CMS/OSS_cms.json");
+}
+
+function LoadIncidentJSON() {
+	LoadRoadTravelConditionsJSON("Incident","/data/INCIDENTS/OSS_incidents.json");
+}
+
+function LoadChainJSON() {
+	LoadRoadTravelConditionsJSON("Chain","/data/CHAIN/OSS_chain.json");
+}
+
+function LoadRWISJSON() {
+	LoadRoadTravelConditionsJSON("RWIS","/data/RWIS/OSS_rwis.json");
+}
+
+// ********************************************************************************************
+
+// Loads the default layers asynchronously
+function LoadJSON() {
+	document.getElementById("splash-panel").innerHTML += "<br>Retrieving Data ...";
+	LoadCCTVJSON();
+	LoadIncidentJSON();
+	LoadCMSJSON();
+	LoadChainJSON();
+	LoadWeatherJSON();
+	LoadRWISJSON();
+	TimerID = setInterval(function(){ CheckJSONandMapload(); }, 100);
+	TimeoutID = setTimeout(function(){ AddMapContent(); }, 60000);
+}
+
+// Adds the default layers and displays the map.
+function CheckJSONandMapload() {
+	if (RoadTravelConditionsArrays["RWIS"] != null && RoadTravelConditionsArrays["CMS"] != null && RoadTravelConditionsArrays["CCTV"] != null && RoadTravelConditionsArrays["Incident"] != null 
+		 && RoadTravelConditionsArrays["Chain"] != null && ForecastWeatherArrays["Weather"] != null && MapLoaded == true) {
+		clearTimeout(TimeoutID);
+		clearInterval(TimerID);
+                //Log analytics
+                LogAnalyticsEvent("LoadTime", "RoadInfoData", Math.round(((new Date().getTime() / 1000)-roadTravelConditionsInitialStart)*10)/10);
+		if((RoadTravelConditionsArrays["RWIS"] == false) || (RoadTravelConditionsArrays["CMS"] == false) || (RoadTravelConditionsArrays["CCTV"] == false) || (RoadTravelConditionsArrays["Incident"] == false) || (RoadTravelConditionsArrays["Chain"] == false) || (ForecastWeatherArrays["Weather"] == false)) {
+			AddMapContent();
+		} else {
+			AddMapContent();
+		}
+	}
+}
+
+// This function is only called in the LoadJSON function, and loads the default layers.
+function AddMapContent() {
+	clearTimeout(TimeoutID);
+	clearInterval(TimerID);
+	if(document.getElementById("continueLink") != null) {
+		document.getElementById("continueLink").setAttribute("onclick", null); // Prevent multiple clicks
+	}
+	if(MapLoaded == false) {
+		document.getElementById("splash-panel").innerHTML += "<br>We're sorry, the map could not be loaded. Please try again later.";
+		return;
+	}
+	document.getElementById("splash-panel").innerHTML += "<br>Adding Map Content ...";
+	
+	for(var i = 0; i< 10000;i++){
+		Markers[i] = new google.maps.Marker({
+			position: new google.maps.LatLng(0, 0),
+			icon: {url: "", scaledSize: new google.maps.Size(25,25)}
+		});
+		Markers[i].addListener('click', function(){markerClick(this.index)});
+		Markers[i].addListener('mouseover', function(){markerMouseOver(this.index)});
+		Markers[i].addListener('mouseout', function(){markerMouseOut(this.index)});
+		Markers[i].index = i;
+	}
+
+	if(RoadTravelConditionsArrays["CCTV"] != null)
+		AddCCTVContent();
+	if(RoadTravelConditionsArrays["Incident"] != null)
+		AddIncidentContent();
+	if(RoadTravelConditionsArrays["CMS"] != null)
+		AddCMSContent();
+	if(RoadTravelConditionsArrays["Chain"] != null)
+		AddChainContent(); 
+	if(ForecastWeatherArrays["Weather"] != null)
+		AddWeatherContent(true);
+	if(RoadTravelConditionsArrays["RWIS"] != null)
+		AddRWISContent();
+	AddTrafficContent();
+	findCenterAndShowElement(); // Displays the element closest to the center of the map. 
+	Firstload = false;
+	resetLegend();
+	HideSplashPanel();
+}
+
+function HideSplashPanel() {
+	setTimeout(function(){ 
+            document.getElementById("splash-panel").style.display = 'none';
+            if (inFocus) {
+                //Log analytics
+                LogAnalyticsEvent("LoadTime", "Map", Math.round(((new Date().getTime() / 1000)-roadTravelConditionsInitialStart)*10)/10);
+            }
+        }, 50);
+}
+
+// This toggles on any layer that is off, if all available layers are already on, it toggles off all the layers. 
+// only adds the ones that haven't failed yet.
+function checkUncheckAll() {
+	var functionRan = false;
+	if ((RoadTravelConditionsArrays["Chain"] && RoadTravelConditionsActiveLayers['Chain'] == false) || 
+                                        (RoadTravelConditionsArrays["Incident"] && RoadTravelConditionsActiveLayers['Incident'] == false) ||
+					(RoadTravelConditionsArrays["CMS"] && RoadTravelConditionsActiveLayers['CMS'] == false) || 
+                                        (RoadTravelConditionsArrays["CCTV"] && RoadTravelConditionsActiveLayers['CCTV'] == false) || 
+					(RoadTravelConditionsArrays["RWIS"] && RoadTravelConditionsActiveLayers['RWIS'] == false) || 
+					(RoadTravelConditionsArrays["RoadInfo"] != false && RoadTravelConditionsActiveLayers['RoadInfo'] == false) || 
+                                        (RoadTravelConditionsArrays["Traffic"] && RoadTravelConditionsActiveLayers['Traffic'] == false) || 
+					(ForecastWeatherArrays["Weather"] && RoadTravelConditionsActiveLayers['Weather'] == false)){
+		functionRan = true; // if any layer that can be on is currently off then turn all layers on.
+	}
+	if (RoadTravelConditionsArrays["Chain"]) { // checks if json exists
+		if (RoadTravelConditionsActiveLayers['Chain'] != functionRan) { // if this layer doesn't match what it should be, switch it.  functionRan is equal to the state all layers should be.
+			AddChainContent();
+		}
+	}
+	if (RoadTravelConditionsArrays["Incident"]) {
+		if (RoadTravelConditionsActiveLayers['Incident'] != functionRan) { // if this layer doesn't match what it should be, switch it.  functionRan is equal to the state all layers should be.
+			AddIncidentContent();
+		}
+	}
+	if (RoadTravelConditionsArrays["CMS"]) {
+		if (RoadTravelConditionsActiveLayers['CMS'] != functionRan) { // if this layer doesn't match what it should be, switch it.  functionRan is equal to the state all layers should be.
+			AddCMSContent();
+		}
+	}
+	if (RoadTravelConditionsArrays["CCTV"]) {
+		if (RoadTravelConditionsActiveLayers['CCTV'] != functionRan) { // if this layer doesn't match what it should be, switch it.  functionRan is equal to the state all layers should be.
+			AddCCTVContent();
+		}
+	}
+	if (RoadTravelConditionsArrays["RWIS"]) {
+		if (RoadTravelConditionsActiveLayers['RWIS'] != functionRan) { // if this layer doesn't match what it should be, switch it.  functionRan is equal to the state all layers should be.
+			AddRWISContent();
+		}
+	}
+	if (RoadTravelConditionsArrays["RoadInfo"] != false) {
+		if (RoadTravelConditionsActiveLayers['RoadInfo'] != functionRan) { // if this layer doesn't match what it should be, switch it.  functionRan is equal to the state all layers should be.
+			AddRoadInfoContent();
+		}
+	}
+	if (RoadTravelConditionsArrays["Traffic"]) {
+		if (RoadTravelConditionsActiveLayers['Traffic'] != functionRan) { // if this layer doesn't match what it should be, switch it.  functionRan is equal to the state all layers should be.
+			AddTrafficContent();
+		}
+	}
+	if (ForecastWeatherArrays["Weather"]) {
+		if (RoadTravelConditionsActiveLayers['Weather'] != functionRan) { // if this layer doesn't match what it should be, switch it.  functionRan is equal to the state all layers should be.
+			AddWeatherContent(true);
+		}
+	}
+	if (functionRan == false) {
+		LogAnalyticsEvent('Layer', 'RTC_All', 'UNCHECK');
+	}
+	else{
+		LogAnalyticsEvent('Layer', 'RTC_All', 'CHECK');
+	}
+}
+
+// Triggers the check on the check all button in the case that all layers are checked already
+function checkIfAllChecked(){
+	if ((RoadTravelConditionsArrays["Chain"] == false || RoadTravelConditionsActiveLayers['Chain'] == true) && 
+			(RoadTravelConditionsArrays["Incident"] == false || RoadTravelConditionsActiveLayers['Incident'] == true) && 
+			(RoadTravelConditionsArrays["CMS"] == false || RoadTravelConditionsActiveLayers['CMS'] == true) && 
+			(RoadTravelConditionsArrays["CCTV"] == false || RoadTravelConditionsActiveLayers['CCTV'] == true) && 
+			(RoadTravelConditionsArrays["RWIS"] == false || RoadTravelConditionsActiveLayers['RWIS'] == true) && 
+			(RoadTravelConditionsArrays["RoadInfo"] == false || RoadTravelConditionsActiveLayers['RoadInfo'] == true) && 
+			(RoadTravelConditionsActiveLayers['Traffic'] == true) && 
+			(ForecastWeatherArrays["Weather"] == false || RoadTravelConditionsActiveLayers['Weather'] == true)){
+		document.getElementById("CheckAllButton").checked = true;	
+	}
+
+}
+
+// Sets the noimage on cctv and cms when the image is unavailable. 
+function setNoImage(imageobject,cameraindex) {
+	imageobject.src = "/icons/RoadTravelConditions/NoImage.jpg";
+	if (Markers[cameraindex].properties.noimage==false) {
+		Markers[cameraindex].properties.noimage=true;
+		Markers[cameraindex].setIcon({ url: '/icons/UI/forbidden.png',	scaledSize: new google.maps.Size(30, 30)});
+		Markers[cameraindex].setZIndex(0);
+	}
+}
+
+// Initilizes the map
+function initMap() {
+	document.getElementById("splash-panel").innerHTML += "<br>Initializing Map ...";
+	var tmpPathRegexResult = /([^\/]+$)/.exec(window.location.href);
+	if ( tmpPathRegexResult === null) {
+		filenameAndParams="";
+	}
+	else {
+		filenameAndParams = tmpPathRegexResult[0];
+	}
+	var filenameRegexResult = /(^[^?]+)/.exec(filenameAndParams);
+	if ( filenameRegexResult === null) {
+		filename="";
+	}
+	else {
+		filename = filenameRegexResult[0];
+	}
+	
+	//sets the location based on any available url information or cookies
+	var url_lat;
+	var url_lng;
+	var url_zoom;
+	// Is the location included in the URL?
+	var LocInURL = false;
+	try { // normal &clng=(num)&clat=(num) format
+		var strclat = /clat=([^&\#]+)/.exec(window.location.href)[1];
+		var strclng = /clng=([^&\#]+)/.exec(window.location.href)[1];
+		url_lng = parseFloat(strclng);
+		url_lat = parseFloat(strclat);
+		if ((url_lat<=50) && (url_lat>=25) && (url_lng<=-100) && (url_lng>=-125)) {
+			LocInURL = true;
+		}
+		else {
+			LocInURL = false;
+		}
+	}
+	catch (e) {
+		LocInURL = false;
+	}
+	if(!LocInURL){
+		try { // old &Center=(num),(num) format
+			var tempstr = /Center=([^,\#]+),([^&\#]+)/.exec(window.location.href);
+			var strclat = tempstr[1];
+			var strclng = tempstr[2];
+			url_lng = parseFloat(strclng);
+			url_lat = parseFloat(strclat);
+			if ((url_lat<=50) && (url_lat>=25) && (url_lng<=-100) && (url_lng>=-125)) {
+				LocInURL = true;
+			}
+			else {
+				LocInURL = false;
+			}
+		}
+		catch (e) {
+			LocInURL = false;
+		}
+	}
+
+	if(LocInURL){ // if there is a location, then check for zoom level
+		try {
+			var strzoom = /[Zz]oom=([^&\#]+)/.exec(window.location.href)[1];
+			url_zoom = parseInt(strzoom);
+			if (!((url_zoom<=21) && (url_zoom>=4))) {
+				url_zoom = 5;
+			}
+		}
+		catch (e) {
+			url_zoom = 5;
+		}
+	}
+	
+	var cookie_lat;
+	var cookie_lng;
+	var cookie_zoom;
+	// Is the location included in the cookie? Only check if not in URL ...
+	var varLocInCookie = false;
+	try {
+		var strclng = getCookie("clng");
+		var strclat = getCookie("clat");
+		var strzoom = getCookie("zoom");
+		cookie_lat = parseFloat(strclat);
+		cookie_lng = parseFloat(strclng);
+		cookie_zoom = parseInt(strzoom);
+		if ((cookie_lat<=50) && (cookie_lat>=25) && (cookie_lng<=-100) && (cookie_lng>=-125) && (cookie_zoom<=21) && (cookie_zoom>=4)) {
+			LocInCookie = true;
+		}
+		else {
+			LocInCookie = false;
+		}
+	}
+	catch (e) {
+		LocInCookie = false;
+	}
+	
+	var initial_lat = 40.5;
+	var initial_lng = -114.00;
+	var initial_zoom = 5;
+	if (LocInURL == true) {
+		initial_lat = url_lat;
+		initial_lng = url_lng;
+		initial_zoom = url_zoom;	
+	}
+	else if (LocInCookie == true) {
+		initial_lat = cookie_lat;
+		initial_lng = cookie_lng;
+		initial_zoom = cookie_zoom;	
+	}
+	else {
+		initial_lat = 40.5;
+		initial_lng = -114.0;
+		initial_zoom = 5;	
+	}
+		
+	var userLoc = { lat: initial_lat , lng: initial_lng };
+	// Create a map and center it 
+	map = new google.maps.Map(document.getElementById('map'), {
+		zoom: initial_zoom,
+		center: userLoc,
+		mapTypeId: 'terrain',
+		mapTypeControl: true,
+		mapTypeControlOptions: {
+			style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+			position: google.maps.ControlPosition.TOP_RIGHT
+		},
+		zoomControl: true,
+                zoomControlOptions: {
+                       position: google.maps.ControlPosition.RIGHT_TOP,
+                },
+		scaleControl: true,
+		streetViewControl: false,
+		fullscreenControl: false
+	});
+
+	var RecenterDiv = document.createElement('div');
+	RecenterDiv.innerHTML = '<div style="padding-right:10px;" title="Zoom to My Location">' +
+		'<div onclick="gotoPosition();"><img src="/icons/UI/location.png" width="40" height="40" alt="Center To Your location" style="border:0"/></div>' +
+		'</div>';
+	RecenterDiv.index = 1;
+	map.controls[google.maps.ControlPosition.RIGHT_TOP].push(RecenterDiv);
+	
+	// *** Sets up AddThis UI element. Not used anymore, configuration of the AddThis is done via the AddThis dashboard. 11/30/2020
+	//var AddThisDiv = document.createElement('div');
+	//AddThisDiv.innerHTML = '<div class="addthis_container" style="padding-right:10px;padding-bottom:10px;" title="Share OSS with Others">' +
+	//	'<a class="addthis_button" target="_blank" id="addthis" href="https://www.addthis.com/bookmark.php?v=300&amp;pubid=ra-50b69ccd50634cf9"><img onload="addthisscripts();"  src="/icons/UI/share.png" width="40" height="40" alt="Bookmark and Share" style="border:0"/></a>' +
+	//	'</div>';
+	//AddThisDiv.index = 1;
+	//map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(AddThisDiv);
+	LogAnalyticsEvent("Load", window.location.href, "(" + initial_lat + "," + initial_lng + ")");
+	
+	// Inits infowindow
+	InfoWindow = new google.maps.InfoWindow({ disableAutoPan : true });
+	google.maps.event.addListener(InfoWindow,"closeclick",function(){
+		RestoreMarkerAtIndex();
+		CurrentIndex = -1;
+		StickyWindowOpen = false;
+	});
+
+	// Inits traffic
+	RoadTravelConditionsArrays["Traffic"] = new google.maps.TrafficLayer();
+	map.addListener('idle', function(event) {
+		setURLAndCookies();
+	});
+	
+	// If on a layer that has mulitple zoom levels (zooming in may show more markers) then make sure the markers are being shown/hidden when zooming
+	google.maps.event.addListener(map, "zoom_changed", function () {
+		if(MenuVariable == "CurrentWeather" && CurrentWeatherLayer != null){
+			showMarkers(CurrentWeatherLayer);
+		}
+		if(MenuVariable == "ForecastWeather" && ForecastWeatherLayer != null){
+			showMarkers(ForecastWeatherLayerAndTime);
+		}
+		if(MenuVariable == "Fire" && FireLayer != null){
+			showMarkers(FireLayer);
+		}
+	});
+
+	// *** Inits WxOverlay
+	//image bounds for all WxOverlay
+	/*var imageBounds = {
+		north: 49.74,
+		south: 31.0,
+		east: -101.7,
+		west: -126.02
+	};*/
+	var imageBounds = {
+		north: 50.0,
+		south: 20.0,
+		east: -65.0,
+		west: -126.0
+	}; 
+	WxOverlay = new google.maps.GroundOverlay("", imageBounds, {clickable: false});;
+
+	//states that the map is now initilized
+	MapLoaded = true;
+	if ((LocInURL == false) && (LocInCookie == false)) {
+		//gotoPosition();
+	}
+	// Changes the km to Miles on the distance meter in the bottom right
+	window.setTimeout(function() {
+      var spn = document.getElementById("map").getElementsByClassName("gm-style-cc");
+      for (var i in spn) {
+        //look for km or m in innerText via regex https://regexr.com/3hiqa
+        if ((/\d\s?(km|(m\b))/g).test(spn[i].innerText)) {
+          spn[i].click();
+        }
+      }
+    }, 1000);
+}
+//*************************************** End Initial Load Functions ******************************************//
+
+//*************************************** Marker Functions *************************************************//
+// Marker actions that are on every marker
+function markerClick(index){
+	HighlightMarkerAtIndex(index);
+	var zoom = map.getZoom();
+	if (zoom < 9) {
+		map.setZoom(9);
+	}
+	ShowCurrentElement();
+	CenterAtCurrentMarker();
+	StickyWindowOpen = true;
+}
+function markerMouseOver(index){
+	if(!(InfoWindow.getMap())){
+		StickyWindowOpen = false;
+	}
+	if (StickyWindowOpen == false) {
+		HighlightMarkerAtIndex(index);
+		ShowCurrentElement();
+	}
+}
+function markerMouseOut(index){
+	if(!(InfoWindow.getMap())){
+		StickyWindowOpen = false;
+	}
+	if (StickyWindowOpen == false) {
+		if (index == CurrentIndex) {
+			closeInfoWindow();
+		}
+	}
+}
+	
+function gotoPosition(position) {
+	if(navigator.geolocation){
+		navigator.geolocation.getCurrentPosition(function(position){
+			//if (confirm('Zoom to location provided by browser?')) {
+				map.panTo(new google.maps.LatLng(position.coords.latitude, position.coords.longitude));
+				map.setZoom(9);
+				LogAnalyticsEvent("Zoom","CurrentLoc","("+position.coords.latitude+ "," + position.coords.longitude + ")");
+			//}
+		},function(){
+			alert("In order to zoom to your location, you must enable location services in your browser");	
+		});
+	}
+	else{
+		alert("In order to zoom to your location, you must enable location services in your browser");
+	}
+}
+
+// Uses global variable CurrentIndex.
+// Side effect: CurrentIndex set to newIndex upon return.
+function HighlightMarkerAtIndex(newIndex) {
+	if  ((newIndex != -1) && (newIndex != CurrentIndex)) {
+		if  (CurrentIndex != -1 && (!Markers[CurrentIndex].properties.hasOwnProperty("noscale")) ) {
+			var oldIcon = Markers[CurrentIndex].getIcon();
+			var sSize = oldIcon.scaledSize;
+			var newScale = null;
+			if(sSize != null){
+				newScale = new google.maps.Size(sSize.width/2, sSize.height/2);
+			}
+			else{
+				newScale = new google.maps.Size(25,25);
+			}
+			
+			Markers[CurrentIndex].setIcon({ url: oldIcon.url,scaledSize: newScale});
+			if (Markers[CurrentIndex].properties.noimage == false) {
+					Markers[CurrentIndex].setZIndex(Markers[CurrentIndex].zIndex-1);
+			}
+			else {
+				Markers[CurrentIndex].setZIndex(0);
+			}
+		}
+		if(!Markers[newIndex].properties.hasOwnProperty("noscale")){
+			var oldIcon = Markers[newIndex].getIcon();
+			var sSize = oldIcon.scaledSize;
+			var newScale = null;
+			if(sSize != null){
+				newScale = new google.maps.Size(sSize.width*2, sSize.height*2);
+			}
+			else{
+				newScale = new google.maps.Size(50,50);
+			}
+			Markers[newIndex].setIcon({ url: oldIcon.url,scaledSize: newScale});
+		}
+	}
+	CurrentIndex = newIndex;
+}
+
+// Uses global variable CurrentIndex.
+function RestoreMarkerAtIndex() {
+	if  (CurrentIndex != -1 && (!Markers[CurrentIndex].properties.hasOwnProperty("noscale"))) {
+		var oldIcon = Markers[CurrentIndex].getIcon();
+		var sSize = oldIcon.scaledSize;
+		var newScale = null;
+		if(sSize != null){
+			newScale = new google.maps.Size(sSize.width/2, sSize.height/2);
+		}
+		else{
+			newScale = new google.maps.Size(25,25);
+		}
+		
+		Markers[CurrentIndex].setIcon({ url: oldIcon.url,scaledSize: newScale});
+		if (!Markers[CurrentIndex].properties.hasOwnProperty("noimage") || Markers[CurrentIndex].properties.noimage == false) {
+			MinZindex = MinZindex -1;
+			Markers[CurrentIndex].setZIndex(MinZindex);
+		}
+		else {
+			Markers[CurrentIndex].setZIndex(0);
+		}
+	}
+}
+
+// This creates the html pop up window.
+function ShowCurrentElement() {
+	if (CurrentIndex == -1)
+		return;
+	var marker = Markers[CurrentIndex];
+	var elementtype = Markers[CurrentIndex].elementtype;
+
+	// gets the element from the correct array
+	var element = null;
+	if(RoadTravelConditionsArrays.hasOwnProperty(elementtype)){
+		element = RoadTravelConditionsArrays[elementtype][Markers[CurrentIndex].elementindex];
+	} else if(CurrentWeatherArrays.hasOwnProperty(elementtype)){
+		element = CurrentWeatherArrays[elementtype][Markers[CurrentIndex].elementindex];
+	} else if(FireArrays.hasOwnProperty(elementtype)){
+		element = FireArrays[elementtype][Markers[CurrentIndex].elementindex];
+	} else if(OtherInfoArrays.hasOwnProperty(elementtype)){
+		element = OtherInfoArrays[elementtype][Markers[CurrentIndex].elementindex];
+	} else {
+		var typesplit = elementtype.split(/(\d+)/)
+		if(ForecastWeatherArrays.hasOwnProperty(typesplit.slice(0,typesplit.length-2).join(""))){
+			elementtype = typesplit.slice(0,typesplit.length-2).join("")
+			element = ForecastMarkers[elementtype][typesplit[typesplit.length-2]][Markers[CurrentIndex].elementindex];
+		}
+	}
+	if(element == null){ // if no element is found, it stops and returns.
+		console.log("Invalid marker");
+		return;
+	}
+	// the rest of this section defines the header of the infowindow, this will be the same for all infowindows.
+	//sets the height of the infowindow
+	var iconheight = marker.getIcon().scaledSize.height;
+	if(marker.getIcon().origin != null)
+		iconheight = marker.getIcon().size.height;
+	var height = (window.innerHeight)-(202+Math.floor(iconheight));
+	if (height < 60)
+		height = 60;
+	if (height > 250)
+		height = 250;
+	var content =	'<div title="Close" class="infowindow '+elementtype+'" onclick="closeInfoWindow();">';
+	// the location and name do not appear in all layers, this makes sure that if it has one that it gets displayed correctly.
+	if(element.location != null && element.location != "N/A")
+		content += '<div class="elementlocation">' + element.location + '</div>';
+	else if(element.name != null && element.name != "N/A" && elementtype != "AHPS")
+		content += '<div class="elementlocation">' + element.name + '</div>';
+	content += '<div class="scroll-container"><div class="scroll" style="max-height:'+height+'px">';
+
+	// the next section defines the content for the infowindow, this is different for each layer.
+	if (elementtype=="CCTV") {
+		var tempurl = element.url.toString();
+		var url = tempurl.split(",")[0];
+		content +=	'<img class="thumbnail" src="' + url +  '"  alt="' + element.location +  '" onerror="setNoImage(this,' + CurrentIndex + ');">';
+	}
+
+	if (elementtype=="CMS") {
+		var CMSHTML = '<div class="infowindowheader">';
+		if(element.updated){
+			CMSHTML += '<b>Updated: </b>' + formatDate(element.updated) + '<br/>';
+		}
+		//CMSHTML += '<b>Location: </b>' + element.latitude + ", " + element.longitude + '<br/>';
+		if(element.direction){
+			CMSHTML += '<b>Direction: </b>' + element.direction + '<br/></div>';
+		}
+		if (element["url"]) {
+			CMSHTML += '<img width=100% src="http://' + element["url"] + '" onerror="setNoImage(this,' + CurrentIndex + ');">';
+		}
+		else if(element["active"] == true) {
+			CMSHTML += '<div class="cmstext">';
+			if (element["text"][0][0].trim().length > 0) {
+				CMSHTML += element["text"][0][0].trim() + '<br />';
+			}
+			if (element["text"][0][1].trim().length > 0) {
+				CMSHTML += element["text"][0][1].trim() + '<br />';
+			}
+			if (element["text"][0][2].trim().length > 0) {
+				CMSHTML += element["text"][0][2].trim() + '<br />';
+			}
+			if ((element["text"][1][0].trim().length > 0) || (element["text"][1][0].trim().length > 0) || (element["text"][1][0].trim().length > 0)) {
+				CMSHTML += '--------------------<br />';
+			}
+			if (element["text"][1][0].trim().length > 0) {
+				CMSHTML += element["text"][1][0].trim() + '<br />';
+			}
+			if (element["text"][1][1].trim().length > 0) {
+				CMSHTML += element["text"][1][1].trim() + '<br />';
+			}
+			if (element["text"][1][2].trim().length > 0) {
+				CMSHTML += element["text"][1][2].trim() + '<br />';
+			}
+			if(element["text"][2]) {
+				if ((element["text"][2][0].trim().length > 0) || (element["text"][2][0].trim().length > 0) || (element["text"][2][0].trim().length > 0)) {
+					CMSHTML += '--------------------<br />';
+				}
+				if (element["text"][2][0].trim().length > 0) {
+					CMSHTML += element["text"][2][0].trim() + '<br />';
+				}
+				if (element["text"][2][1].trim().length > 0) {
+					CMSHTML += element["text"][2][1].trim() + '<br />';
+				}
+				if (element["text"][2][2].trim().length > 0) {
+					CMSHTML += element["text"][2][2].trim() + '<br />';
+				}
+			}
+			CMSHTML += '</div>';
+		}
+		content += CMSHTML;
+	}
+
+	if (elementtype=="Incident") {	
+		var incidentHTML =	'<div class="infowindowheader">';
+		var labels = ['Type',
+                          'Area',
+                          'Route',
+                          'Milepost',
+                          'Severity',
+                          'Advice',
+                         ]
+                for (var label in labels) {
+                    var labelLower = labels[label].toLowerCase();
+                    if(element[labelLower]) {
+			incidentHTML += '<b>'+labels[label]+': </b>' + element[labelLower] + '<br/>';
+		    }
+                }
+		if (element["starttime"] != null){
+			incidentHTML += '<span class="label">Start Time:</span> ' + formatDate(element["starttime"]) + '<br />';
+		}
+		if (element["updated"] != null){
+			incidentHTML += '<span class="label">Updated:</span> ' + formatDate(element["updated"]) + '<br />';
+		}
+		if (element["endtime"] != null){
+			incidentHTML += '<span class="label">Clear Time:</span> ' + formatDate(element["endtime"]) + '<br />';
+		}
+		incidentHTML += '</div><div class="infowindowdetail">';
+
+		var incidentDetailText = '';
+		if (element["detail"] != null) {
+			if (element["detail"].length > 0) {
+				for(var d=0; d<element["detail"].length; d++) {
+					if (element.source == "CHP") {
+						incidentDetailText += formatDate(element["detail"][d][0]) + '\n';	
+						incidentDetailText += element["detail"][d][1] + '\n';	
+					}
+					else {
+						incidentDetailText += element["detail"][d][0] + "\n";
+					}
+				}
+				incidentDetailText += '\n';
+			}
+		}
+		if (element["units"] != null) {
+			if (element["units"].length > 0) {
+				incidentDetailText += 'Responding Officer Status:\n';
+				incidentDetailText += '--------------------------\n\n';
+				for(var u=0; u<element["units"].length; u++) {
+					incidentDetailText += formatDate(element["units"][u][0]) + '\n';
+					incidentDetailText += element["units"][u][1] + '\n';				
+				}
+			}
+		}
+		if ((element["detail"] != null) || (element["units"])) {
+			if ((element["detail"].length > 0) || (element["units"].length > 0)) {
+				incidentHTML += '<span class="label">Details:</span>';
+				if(element.source == "IDOT"){ // IDOT's details come formated as HTML.
+					incidentHTML += incidentDetailText;
+				} else {
+					incidentHTML += '<div class="textarea">';
+					incidentHTML += incidentDetailText.replace(/\n/g,"<br />");
+					incidentHTML += '</div>';		
+				}
+			}
+		}
+		incidentHTML += '</div>';
+		content +=	incidentHTML;
+	}
+	
+	if (elementtype=="Chain") {		
+		var chainHTML = '';
+		if (element.source == "CALTRANS") {
+			chainHTML += '<div class="infowindowheader">';
+			chainHTML += '<span class="label">Updated:</span> ' + formatDate(element["updated"]) + '<br />';
+			chainHTML += '<span class="label">Elevation:</span> ' + element["elevation"] + ' ft.<br />';
+			chainHTML += '<span class="label">Route:</span> ' + element["route"] + '<br />';
+			chainHTML += '<span class="label">Milepost:</span> ' + element["milepost"] + '<br />';
+			chainHTML += '<span class="label">Status:</span> ' + element["status"] + '<br />';
+			chainHTML += '<span class="label">Restrictions:</span> ' + element["restrictions"] + '<br />';
+			chainHTML += '</div>';
+		}
+		if (element.source == "ODOT") {
+			chainHTML += '<div class="infowindowheader">';
+			chainHTML += '<span class="label">Updated:</span> ' + formatDate(element["updated"]) + '<br />';
+			if (element["mp1"]) {
+				chainHTML += '<span class="label">Milepost:</span> ' + element["mp1"][1] + '<br />';
+			}
+			if (element["temperature"]) {
+				chainHTML += '<span class="label">Temperature:</span> ' + element["temperature"] + '<br />';
+			}
+			if (element["pavement"]) {
+				chainHTML += '<span class="label">Road Conditions:</span> ' + element["pavement"] + '<br />';
+			}
+			if (element["snowdepth"]) {
+				chainHTML += '<span class="label">Snow Depth:</span> ' + element["snowdepth"] + '<br />';
+			}
+			if (element["snowoffroad"]) {
+				chainHTML += '<span class="label">Snow Off Road:</span> ' + element["snowoffroad"] + '<br />';
+			}
+			if (element["skycoverage"]) {
+				chainHTML += '<span class="label">Sky Coverage:</span> ' + element["skycoverage"] + '<br />';
+			}
+			if (element["restrictions"]) {
+				chainHTML += '<span class="label">Restrictions:</span> ' + element["restrictions"] + '<br />';
+			}
+			chainHTML += '</div>';
+		}
+		if (element.source == "WSDOT") {
+			chainHTML += '<div class="infowindowheader">';
+			chainHTML += '<span class="label">Updated:</span> ' + formatDate(element["updated"]) + '<br />';
+			chainHTML += '<span class="label">Elevation:</span> ' + element["elevation"] + ' ft.<br />';
+			chainHTML += '<span class="label">Road Conditions:</span> ' + element["road_condition"] + '<br />';
+			chainHTML += '<span class="label">Weather Conditions:</span> ' + element["weathercondition"] + '<br />';
+			chainHTML += '<span class="label">Restrictions:</span> ' + element["restrictions"] + '<br />';
+			chainHTML += '</div>';
+		}
+		if (element.source == "MDOT") {
+			chainHTML += '<div class="infowindowheader">';
+			chainHTML += '<span class="label">Updated:</span> ' + formatDate(element["updated"]) + '<br />';
+			chainHTML += '<span class="label">Headline:</span> ' + element["headline"] + '<br />';
+			chainHTML += '<span class="label">Location:</span> ' + element["location_description"] + '<br />';
+			chainHTML += '<span class="label">Report:</span> ' + element["report"] + '<br />';
+			chainHTML += '</div>';
+		}			
+		content += chainHTML;
+	}	
+
+	if (elementtype == "RWIS") {
+		//attributes for RWIS
+		var atmosdata = [
+			"Air Temperature",
+			"Max Air Temperature",
+			"Min Air Temperature",
+			"Wet Bulb Temperature",
+			"Wind Speed",
+			"Wind Gust",
+			"Wind Direction",
+			"Cardinal Wind Direction",
+			"Max Wind Direction",
+			"Min Wind Direction",
+			"Spot Wind Speed",
+			"Spot Wind Direction",
+			"Dewpoint",
+			"Pressure",
+			"Humidity",
+			"Precipitation",
+			"Precipitation Intensity",
+			"Precipitation Rate",
+			"Precipitation Accumulation",
+			"24 Hour Precipitation Accumulation",
+			"12 Hour Precipitation Accumulation",
+			"6 Hour Precipitation Accumulation",
+			"3 Hour Precipitation Accumulation",
+			"1 Hour Precipitation Accumulation",
+			"10 Minute Precipitation Accumulation",
+			"Last Precip Event Start Time",
+			"Last Precip Event End Time",
+			"Visibility",
+			"Visibility Situation",
+			"Water Level",
+		];
+		var surfacedata = [
+			"Surface Condition",
+			"Surface Temperature",
+			"Soil Temperature",
+			"Freezing Point",
+			"Black Ice Status",
+			"Ice Percent",
+			"Surface Ice or Water Depth",
+			"Surface Salinity",
+			"Surface Conductivity",
+			"Pavement Type",
+			"Chemical",
+			"Chemical Percent",
+			"Subsurface Temperature",
+			"Subsurface Moisture",
+		];
+
+		//header information
+		RWISHTML = '<div class="infowindowheader">';
+		if (element['elevation'] && typeof element['elevation'] != 'string'){
+			RWISHTML += '<b>Elevation: </b>'+element['elevation'][0];
+			RWISHTML += ' '+element['elevation'][1]+'<br/>';
+		}
+		if(element['updated'] && element['updated'] != 'null' && element['updated'] != null){
+			RWISHTML += formatDate(element['updated']) + '<br/>';
+		}
+		RWISHTML += '</div>';
+
+		//main content table
+		var table = '';
+		var hasAtmosData = atmosdata.some(function(entry) { 
+			return (entry in element && element[entry] != null && element[entry] != undefined && element[entry] != "" && String(element[entry]).toLowerCase() !== "not reported")
+		});
+
+		if (hasAtmosData) {
+			table += '<br/>';
+			table += '<b class="infowindowtableheader">Atmospheric Data:</b><br/>';
+			table += '<table class="infowindowtable"><tbody>';
+			for(var aval in atmosdata){
+				aval = atmosdata[aval];
+				if(element[aval] == "" || element[aval] == "null" || element[aval] == null || String(element[aval]).toLowerCase() == "not reported"){continue;}
+				if(aval in element){
+					table += '<tr><td>'+aval+'</td><td>';
+					if(aval == "Last Precip Event Start Time" || aval == "Last Precip Event End Time") {
+						if (typeof element[aval] === "string")
+							table += formatDate(element[aval])
+						else
+							table += element[aval][0]+element[aval][1]
+					} else {
+						if (typeof element[aval] === "string")
+							table += element[aval]
+						else
+							table += element[aval][0]+element[aval][1]
+					}
+					table += '</td></tr>';
+				}
+			}
+			table += '</tbody></table>';
+		}
+
+		var hasSurfaceData = surfacedata.some(function(entry) { 
+			return (entry in element && element[entry] != null && element[entry] != undefined && element[entry] != "" && String(element[entry]).toLowerCase() !== "not reported")
+		});
+
+		if (hasSurfaceData) {
+			table += '<br/>';
+			table += '<b class="infowindowtableheader">Surface Data:</b><br/>';
+			table += '<table class="infowindowtable"><tbody>';
+			for(var aval in surfacedata){
+				aval = surfacedata[aval];
+				if(element[aval] == "" || element[aval] == "null" || element[aval] == null || String(element[aval]).toLowerCase() == "not reported" ){continue;}
+				if(aval in element){
+					table += ('<tr><td>'+aval+'</td><td>'+
+								(typeof element[aval] === "string" ?
+								element[aval] : element[aval][0]+element[aval][1])+
+								'</td></tr>');
+				}
+			}
+			table += '</tbody></table><br>';
+		}
+
+		table += "<br/>";
+		//end main content table
+		content +=	RWISHTML + table;
+	} 
+
+	if (elementtype=="RoadInfo") {
+		var RoadInfoHTML =	'<div class="infowindowheader">' +
+							'<b>Updated: </b>' + formatDate(element.updated) + '<br/>';
+		var labels = ['Region',
+                          'Facility',
+                          'Type',
+                          'Route',
+                          'Milepost',
+                          'Severity',
+                         ]
+                for (var label in labels) {
+                    var labelLower = labels[label].toLowerCase();
+                    if(element[labelLower]) {
+			RoadInfoHTML += '<b>'+labels[label]+': </b>' + element[labelLower] + '<br/>';
+		    }
+                }
+		var roadInfoDetailText = "";
+		roadInfoDetailText += "Description: \n" + element.description + "\n";
+		if(element.advice) {
+			roadInfoDetailText += '\nAdvice: \n' + element.advice + "\n";
+		}
+		if(element.starttime!='' && element.endtime!='') {
+			roadInfoDetailText += '\nStart --- End Date(s): \n';
+			for(var i=0; i<element.starttime.length; i++) {
+				roadInfoDetailText += formatDate(element.starttime[i]) + ' --- ' + formatDate(element.endtime[i]) + '\n\n';
+			}
+		}
+		RoadInfoHTML += '<b>Details: </b></div>';
+		RoadInfoHTML += '<div class="infowindowdetail">';
+		RoadInfoHTML += '<div class ="textarea">';
+		RoadInfoHTML += roadInfoDetailText.replace(/\n/g,"<br />");
+		RoadInfoHTML += '</div></div>';
+		content +=	RoadInfoHTML;
+	}
+
+	// each of these layers have the same infowindow.
+	if (elementtype == "ForecastAirTemperature" || elementtype == "WindSpeed" || elementtype == "WindGustSpeed" || elementtype == "ForecastHumidity" || elementtype == "SkyCover" || elementtype == "Precipitation12hour" || elementtype == "Precipitation6hour" || elementtype == "Snow" || elementtype == "Weather" || elementtype == "AHPS"){
+	
+		content =	'<div class="infowindow '+elementtype+'" onclick="closeInfoWindow();"><div><div>';
+		if(marker.properties.content)
+			content += marker.properties.content
+
+	}
+	// each of these layers have the same infowindow.
+	if (elementtype=="CurrentAirTemperature" || elementtype=="Humidity" || elementtype=="Precipitation1hour" || elementtype=="Precipitationt24hour" || elementtype=="Wind") {
+		var AirTemperatureHTML =	'<div class="infowindowheader">' + 
+									'<span class="label">Updated:</span> ' + formatDate(element.updated) + '<br />' +
+									'<span class="label">Elevation:</span> ' + element.elevation + '<br />' +
+									'<span class="label">Provider:</span> ' + element.provider + '<hr />' +
+									'<span class="label">Observation Data:</span><br />'+
+									'<table class="infowindowtable"><tbody>' +
+									'<tr>' +
+										'<td><b>Sensor</b></td>' +
+										'<td><b>Value</b></td>' +
+										'<td><b>Updated</b></td>' +
+									'</tr>';
+		sensors = ["Temperature","Wind Speed","Wind Direction","Wind Gust Speed","1 Hour Precipitation","24 Hour Precipitation","Humidity","Dewpoint"];
+		for(sensor in sensors){
+			sensor = sensors[sensor];
+			if(element.sensors.hasOwnProperty(sensor)){
+				AirTemperatureHTML += '<tr><td>' + sensor + '</td><td>' + element.sensors[sensor].value.join("") + '</td><td>' + formatDate(element.sensors[sensor].updated) + '</td></tr>';
+			}
+		}
+		AirTemperatureHTML += '</tbody></table></div><br>';
+		content +=	AirTemperatureHTML;
+	}
+	
+	if (elementtype=="FireIncidents") {
+		var FireHTML =	'<div class="infowindowheader">';
+		if(element.date) {
+			FireHTML += '<b>Report Date: </b>' + element.date + '<br/>';
+		}
+		if(element.location) {
+			FireHTML += '<b>Fire Location: </b>' + element.location + '<br/>';
+		}
+		if(element.firesize) {
+			FireHTML += '<b>Fire Size: </b>' + element.firesize + '<br/>';
+		}
+		if(element.percentcontained) {
+			FireHTML += '<b>Percent Contained: </b>' + element.percentcontained + '<br/>';
+		}
+		if(element.expectedcontainment) {
+			FireHTML += '<b>Expected Containment: </b>' + element.expectedcontainment + '<br/>';
+		}
+		if(element.firetype) {
+			FireHTML += '<b>Fire Type: </b>' + element.firetype + '<br/>';
+		}
+		if(element.teamtype) {
+			FireHTML += '<b>Team Type: </b>' + element.teamtype + '<br/>';
+		}
+		FireHTML += "</div>";
+		content +=	FireHTML;
+		element.source = "InciWeb";
+	}
+	if (elementtype=="FireDetectors") {
+		var FireHTML =	'<div class="infowindowheader">';
+		if(element.datetime) {
+			FireHTML += '<b>Detection Datetime: </b>' + formatDate(element.datetime) + '<br/>';
+		}
+		if(element.confidence) {
+			FireHTML += '<b>Confidence: </b>' + element.confidence + '<br/>';
+		}
+		if(element.sensor) {
+			FireHTML += '<b>Sensor: </b>' + element.sensor + '<br/>';
+		}
+		FireHTML += "</div>";
+		content +=	FireHTML;
+		element.source = "USDA Forest Service";
+	}
+	if (elementtype=="RestAreas") {
+		var HTML =	'<div class="infowindowheader">';
+		if(element.route) {
+			HTML += '<b>Route: </b>' + element.route + '<br/>';
+		}
+		if(element.milepost) {
+			HTML += '<b>Milepost: </b>' + element.milepost + '<br/>';
+		}
+		if(element.description) {
+			HTML += '<b>Description: </b>' + element.description + '<br/>';
+		}
+		if(element.services) {
+			HTML += '<b>Services: </b>' + element.services + '<br/>';
+		}
+		HTML += "</div>";
+		content +=	HTML;
+	}
+	if (elementtype=="FeaturesOfInterest") {
+		var HTML =	'<div class="infowindowheader">';
+		if(element.route) {
+			HTML += '<b>Route: </b>' + element.route + '<br/>';
+		}
+		if(element.postmile) {
+			HTML += '<b>Postmile: </b>' + element.postmile + '<br/>';
+		}
+		HTML += "</div>";
+		content +=	HTML;
+	}
+	if (elementtype=="TruckScales") {
+		var HTML =	'<div class="infowindowheader">';
+		if(element.elevation) {
+			HTML += '<b>Elevation: </b>' + element.elevation + '<br/>';
+		}
+		if(element.route) {
+			HTML += '<b>Route: </b>' + element.route + '<br/>';
+		}
+		if(element.milepost) {
+			HTML += '<b>Milepost: </b>' + element.milepost + '<br/>';
+		}
+		if(element.county) {
+			HTML += '<b>County: </b>' + element.county + '<br/>';
+		}
+		if(element.postmile) {
+			HTML += '<b>Postmile: </b>' + element.postmile + '<br/>';
+		}
+		HTML += "</div>";
+		content +=	HTML;
+	}
+	if (elementtype=="SummitLocations") {
+		var HTML =	'<div class="infowindowheader">';
+		if(element.elevation) {
+			HTML += '<b>Elevation: </b>' + element.elevation + ' ft <br/>';
+		}
+		HTML += "</div>";
+		content +=	HTML;
+	}
+	// Finailly this section adds the end content that is on each infowindow.
+	content += '</div></div>' //.scroll .scroll-container
+	var weatherurl = 'https://forecast.weather.gov/MapClick.php?lat=' + element.latitude + '&lon=' + element.longitude;
+	if(element.source != null && elementtype != "SummitLocations")
+		content +=	'<div class="source">SOURCE: ' + element.source + '</div>'
+        if(elementtype == "CCTV"){
+	    content += '<div class="links"><a title="View Enlarged Image" onclick="LogAnalyticsEvent(\'Marker\', \'CCTVModal\', \'(' + element.latitude + ',' + element.longitude + ')\');openmodal(event);" href="#" style="margin-right:78px">ENLARGE IMAGE</a><a title="View NWS Forecast" target="_blank" href="' + weatherurl + '" onclick="LogAnalyticsEvent(\'Link\', \'NWS\', \'(' + element.latitude + ',' + element.longitude + ')\');">NWS FORECAST</a></div>' + '</div>';
+        }else{
+	    content += '<div title="View NWS Forecast" class="links"><a target="_blank" href="' + weatherurl + '" onclick="LogAnalyticsEvent(\'Link\', \'NWS\', \'(' + element.latitude + ',' + element.longitude + ')\');">NWS FORECAST</a></div>' + '</div>';
+        }
+	// opens the infowindow.
+	InfoWindow.setContent(content);
+	InfoWindow.open(map,marker);
+	LogAnalyticsEvent("Marker", elementtype, "(" + element.latitude + "," + element.longitude + ")");
+}
+
+function closeInfoWindow() {
+	InfoWindow.close();
+	RestoreMarkerAtIndex();
+	CurrentIndex = -1;
+	StickyWindowOpen = false;
+}
+
+function findCenterAndShowElement() {
+	var center = map.getCenter();
+	var point = fromLatLngToPoint(center);
+	if(point == null)
+		return;
+	var newPoint = new google.maps.Point(point.x, point.y + 150);
+	var newCenter = point2LatLng(newPoint);
+	var minindex = NearestElementIndex(newCenter);
+	HighlightMarkerAtIndex(minindex);
+	ShowCurrentElement();
+	//CenterAtCurrentMarker();
+}
+
+// FROM: http://krasimirtsonev.com/blog/article/google-maps-api-v3-convert-latlng-object-to-actual-pixels-point-object
+function fromLatLngToPoint(latLng) {
+	if(map.getProjection() == null)
+		return null;
+	var topRight = map.getProjection().fromLatLngToPoint(map.getBounds().getNorthEast());
+	var bottomLeft = map.getProjection().fromLatLngToPoint(map.getBounds().getSouthWest());
+	var scale = Math.pow(2, map.getZoom());
+	var worldPoint = map.getProjection().fromLatLngToPoint(latLng);
+	return new google.maps.Point((worldPoint.x - bottomLeft.x) * scale, (worldPoint.y - topRight.y) * scale);
+}
+
+function point2LatLng(point) {
+	var topRight = map.getProjection().fromLatLngToPoint(map.getBounds().getNorthEast());
+	var bottomLeft = map.getProjection().fromLatLngToPoint(map.getBounds().getSouthWest());
+	var scale = Math.pow(2, map.getZoom());
+	var worldPoint = new google.maps.Point(point.x / scale + bottomLeft.x, point.y / scale + topRight.y);
+	return map.getProjection().fromPointToLatLng(worldPoint);
+}
+
+function CenterAtCurrentMarker() {
+	if  (CurrentIndex == -1)
+		return;
+	var marker = Markers[CurrentIndex];
+	var elementtype = Markers[CurrentIndex].elementtype;
+
+	// gets the element from the correct array
+	var element = null;
+	if(RoadTravelConditionsArrays.hasOwnProperty(elementtype)){
+		var element = RoadTravelConditionsArrays[elementtype][Markers[CurrentIndex].elementindex];
+	} else if(CurrentWeatherArrays.hasOwnProperty(elementtype)){
+		var element = CurrentWeatherArrays[elementtype][Markers[CurrentIndex].elementindex];
+	} else if(FireArrays.hasOwnProperty(elementtype)){
+		var element = FireArrays[elementtype][Markers[CurrentIndex].elementindex];
+	} else if(OtherInfoArrays.hasOwnProperty(elementtype)){
+		var element = OtherInfoArrays[elementtype][Markers[CurrentIndex].elementindex];
+	} else {
+		var typesplit = elementtype.split(/(\d+)/)
+		if(ForecastWeatherArrays.hasOwnProperty(typesplit.slice(0,typesplit.length-2).join(""))){
+			elementtype = typesplit.slice(0,typesplit.length-2).join("")
+			element = ForecastMarkers[elementtype][typesplit[typesplit.length-2]][Markers[CurrentIndex].elementindex];
+		}
+	}
+	if(element == null){
+		console.log("Invalid marker");
+		return;
+	}
+	var point = fromLatLngToPoint(new google.maps.LatLng(element.latitude, element.longitude));
+	var newPoint = new google.maps.Point(point.x, point.y - 150);
+	map.panTo(point2LatLng(newPoint));
+}
+
+// On load, this displays the closest element of the types desired to the center of the map.
+function NearestElementIndex(center) {
+	var mindist = 999999999.99;
+	var minindex = -1;
+	for(var i=0; i<Markers.length; i++) {
+		if (Markers[i]) {
+			var elementtype = Markers[i].elementtype;
+			// gets the element from the correct array
+			var element = null;
+			if(RoadTravelConditionsArrays.hasOwnProperty(elementtype)){
+				var element = RoadTravelConditionsArrays[elementtype][Markers[i].elementindex];
+			} else{
+				continue;
+			}
+			var dist = (center.lng() - element.longitude)*(center.lng() - element.longitude) + (center.lat() - element.latitude)*(center.lat() - element.latitude);
+			if ((dist < mindist)) {
+				mindist = dist;
+				minindex = i;
+			}
+		}
+	}
+	return minindex;
+}
+
+// used on all precipitation layers except for 12-hour-precip to set the icons for each layer. 
+function setPrecipIcon(marker,value){
+	if(value > 10)
+		value = 10;
+	if(value < .01){
+		marker.icon.url = '/icons/Precip/0.0.png';
+		marker.icon.scaledSize.width = 20;
+		marker.icon.scaledSize.height = 20;
+	}
+	else{
+		marker.icon.url = '/icons/Precip/' + value + '.png';
+	}
+}
+
+// used on each wind layer to set the icons for the wind.
+function setWindIcon(marker,value1,value2){
+	if(value1 < 0)
+		value1 = 0;
+	if(value1 == 0)
+		value2 = 0;
+	value2 = Math.round(value2/22.5)*22.5;	
+	if(value1 > 10 && value1%2 == 1)
+		value1++;
+	if(value1 > 50)
+		value1 = 50;
+	if(value2 == 360)
+		value2 = 0;
+	
+	var size = 5+(10*Math.sqrt(value1));
+	marker.icon.url = '/icons/Wind/' + value1 + '_' + value2 + '.png';
+	marker.icon.scaledSize.width = size;
+	marker.icon.scaledSize.height = size;
+}
+
+// map is either a reference to the global map, or null. variable is one of the layer's elementtype. 
+// See url for more info.  https://developers.google.com/maps/documentation/javascript/examples/marker-remove
+function setMapOnAll(map, variable) {
+	var zoom = ZoomLevels[0];
+	if(map != null){
+		zoom = map.getZoom();
+	}
+	if(zoom < ZoomLevels[0]){
+		zoom = ZoomLevels[0];
+	}
+	for (var i = 0; i < Markers.length; i++) {
+		if (Markers[i] != null) {
+			if (Markers[i].elementtype == variable) {
+				if(map != null && Markers[i].properties.hasOwnProperty("zoom")){ // Makes sure the zoom levels are set correctly
+					if(Markers[i].properties.zoom <= zoom){
+						Markers[i].setMap(map);
+					}
+					else{
+						Markers[i].setMap(null);
+					}
+				}
+				else{
+					// Lazy fix to resolve error thrown on RoadInfo marker that doesn't have x or dx properties.
+					try {
+						Markers[i].setMap(map);
+					}
+					catch (error) {
+
+					}
+				}
+			}
+		}
+	}
+}
+
+function clearAllMarkers(){
+	for (var i = 0; i < Markers.length; i++) {
+		if(Markers[i] != null)
+			Markers[i].setMap(null);
+	}
+}
+
+// See url for more info.  https://developers.google.com/maps/documentation/javascript/examples/marker-remove
+function clearMarkers(variable) {
+	setMapOnAll(null, variable);
+}
+
+// See url for more info.  https://developers.google.com/maps/documentation/javascript/examples/marker-remove
+function showMarkers(variable) {
+	setMapOnAll(map, variable);
+}
+
+function openmodal(e){
+	if (CurrentIndex == -1)
+		return;
+	var marker = Markers[CurrentIndex];
+	var elementtype = Markers[CurrentIndex].elementtype;
+	
+	if (elementtype=="CCTV") {
+		var element = RoadTravelConditionsArrays[elementtype][Markers[CurrentIndex].elementindex];
+		if(element == null){
+			console.log("Invalid marker");
+			return;
+		}
+		var tempurl = element.url.toString();
+		var url = tempurl.split(",")[0];
+		document.getElementById("modal-content").innerHTML =	'<img title="Close" onload=\'document.getElementById("image-modal").className += " shown";\' onclick="closemodal();" class="thumbnail" src="' + url +  '" alt="' + element.location +  '">';
+
+		e.stopPropagation();
+	}
+}
+function closemodal(){
+	document.getElementById("image-modal").className = "modal";
+}
+
+// This is the function that generates/adds makers. it goes through 0 to len and calls fn to set the marker properties, it then calls done when the markers are added.
+// group is true if the layer belongs to either Road/travel conditions or Other info,
+function asyncAddMarkers(len, fn, done, group){ // Todo, make sync?
+	var i = 0;
+	var markerindex = 0; // set start to the begining of the markerpool
+	function chunk(){ // this allows this function to be async, allowing other actiions to be delt with, while it's loading.
+		if(group)
+			markerindex = groupindex; // unless it's in a group in which case start where the last one left off.
+		var zoom = ZoomLevels[0];
+		if(map != null){
+			zoom = map.getZoom();
+		}
+		if(zoom < ZoomLevels[0]){
+			zoom = ZoomLevels[0];
+		}
+		var starti = i;
+		var starttime = Date.now();
+		while(i < len && (Date.now() - starttime) <= 200){ // sets up the loop for only run for 200ms
+			var j = i+20;
+			if( j >= len)
+				j = len;
+			while(i < j){
+				if(!Markers[markerindex]){ // if needs marker out of bounds, then make a new marker
+					Markers[markerindex] = new google.maps.Marker({
+						position: new google.maps.LatLng(0, 0),
+						icon: {url: "", scaledSize: new google.maps.Size(25,25)}
+					});
+					Markers[markerindex].addListener('click', function(){markerClick(this.index)});
+					Markers[markerindex].addListener('mouseover', function(){markerMouseOver(this.index)});
+					Markers[markerindex].addListener('mouseout', function(){markerMouseOut(this.index)});
+					Markers[markerindex].index = markerindex;
+				}
+				else{
+					Markers[markerindex].setMap(null); // remove marker if it already exists
+				}
+				marker = Markers[markerindex];
+				//sets some basic properties for all markers..
+				marker.title = null;
+				marker.elementtype = null;
+				marker.icon.scaledSize.width = 25;
+				marker.icon.scaledSize.height = 25;
+				marker.properties = {};
+				marker.setZIndex(1000);
+				fn(marker,i);
+				if(marker.elementtype == null){ // if elementtype == null, there was a reason to not add this marker, so skip to the next one.
+					i++;
+					continue;
+				}
+				marker.elementindex = i;
+
+				// this adds the marker to the map if it is suppose to be displayed.
+				if(map != null && marker.properties.hasOwnProperty("zoom")){ // Makes sure the zoom levels are set correctly
+					if(marker.properties.zoom <= zoom){
+						marker.setMap(map);
+					}
+					else{
+						marker.setMap(null);
+					}
+				}
+				else{
+					marker.setMap(map);
+				}
+				markerindex++;
+				++i;
+			}
+		}
+		groupindex = markerindex;
+		//console.log("i: " + i + " starti " + starti + " diff: " + (i - starti))
+		if(i < len){ // sets the next chunk
+			setTimeout(chunk,1);
+		} else { // ends the function.
+			if(!group){
+				for(var j = i;j<Markers.length;j++){
+					Markers[j].setMap(null);
+				}
+			}
+			done();
+		}
+	}
+	chunk();
+}
+//****************************************** End Marker Functions ************************************************//
+
+//***************************************** Road Travel Conditions Menu Items ************************************//
+// This section adds/removes the roadtravelconditonlayers.
+function AddRoadTravelConditionsContent(layer,fn){
+	var check = document.getElementById(layer + "Button");
+	if (RoadTravelConditionsActiveLayers[layer] == true) { // deactivates the layer if it was already active
+		clearMarkers(layer);
+		RoadTravelConditionsActiveLayers[layer] = false;
+		setURLAndCookies();
+		check.checked = false;
+		LogAnalyticsEvent('Layer', 'RTC_' + layer, 'UNCHECK');
+		document.getElementById("CheckAllButton").checked = false;
+	} else if (RoadTravelConditionsMarkersGenerated[layer] == true) { // activates the layer normally if the markers are already generated
+		showMarkers(layer);
+		RoadTravelConditionsActiveLayers[layer] = true;
+		setURLAndCookies();
+		check.checked = true;
+		LogAnalyticsEvent('Layer', 'RTC_' + layer, 'CHECK');
+		checkIfAllChecked()
+	} else { // generate the markers and add them to the map.
+		RoadTravelConditionsActiveLayers[layer] = true;
+		var done = function(){
+			RoadTravelConditionsMarkersGenerated[layer] = true; // Markers are now generated.
+			if(RoadTravelConditionsActiveLayers[layer] == false){
+				clearMarkers(layer);
+				return;
+			}
+			RoadTravelConditionsActiveLayers[layer] = true;
+			setURLAndCookies();
+			check.checked = true;
+			LogAnalyticsEvent('Layer', 'RTC_' + layer, 'CHECK');
+			checkIfAllChecked()
+		}
+		asyncAddMarkers(RoadTravelConditionsArrays[layer].length,fn,done,true); // This adds the markers to the map as they are generated.
+	}
+}
+
+// These next functions just set the marker function and sends it to AddRoadTravelConditionsContent
+function AddCCTVContent() {
+	var fn = function(marker,i){
+		var url = ("" + RoadTravelConditionsArrays["CCTV"][i].url).split(",");
+		// Need to check this check - it is dropping ODOT CCTVs.
+		//if ((url.length > 0) && (RoadTravelConditionsArrays["CCTV"][i].active)) {
+		if ((url[0].length > 0)) {
+			marker.position = new google.maps.LatLng(RoadTravelConditionsArrays["CCTV"][i].latitude, RoadTravelConditionsArrays["CCTV"][i].longitude)
+			marker.title = 'CCTV'
+			marker.elementtype = "CCTV";
+			marker.icon.url = '/icons/RoadTravelConditions/CCTV.png';
+			marker.properties.noimage = false;
+			marker.setZIndex(1004);
+		}
+	}
+	AddRoadTravelConditionsContent("CCTV",fn);
+}
+
+function AddCMSContent() {
+	var fn = function(marker,i){
+		//if ((RoadTravelConditionsArrays["CMS"][i]["active"]) || (RoadTravelConditionsArrays["CMS"][i]["url"])) {
+		marker.position = new google.maps.LatLng(RoadTravelConditionsArrays["CMS"][i].latitude, RoadTravelConditionsArrays["CMS"][i].longitude)
+		marker.title = 'CMS'
+		marker.elementtype = "CMS";
+		marker.icon.url = '/icons/RoadTravelConditions/cms.png';
+		marker.icon.scaledSize.width = 24;
+		marker.icon.scaledSize.height = 11;
+		marker.properties.noimage = false;
+		marker.setZIndex(1003);
+		if (!(RoadTravelConditionsArrays["CMS"][i]["active"])) {
+			marker.icon.url = '/icons/RoadTravelConditions/cms_blank.png';
+			marker.setZIndex(1002);
+		}
+	}
+	AddRoadTravelConditionsContent("CMS",fn);
+}
+
+function AddIncidentContent() {
+	var fn = function(marker,i){
+		marker.position = new google.maps.LatLng(RoadTravelConditionsArrays["Incident"][i].latitude, RoadTravelConditionsArrays["Incident"][i].longitude)
+		marker.title = 'Incident'
+		marker.elementtype = "Incident";
+		marker.icon.url = '/icons/RoadTravelConditions/A.png'
+		marker.icon.scaledSize.width = 24;
+		marker.icon.scaledSize.height = 21;
+		marker.setZIndex(1005);
+	}
+	AddRoadTravelConditionsContent("Incident",fn);
+}
+
+function AddChainContent() {
+	var fn = function(marker,i){
+		marker.position = new google.maps.LatLng(RoadTravelConditionsArrays["Chain"][i].latitude, RoadTravelConditionsArrays["Chain"][i].longitude)
+		marker.title = 'Chain'
+		marker.elementtype = "Chain";
+		marker.icon.url = '/icons/RoadTravelConditions/chain.png';
+		marker.icon.scaledSize.width = 17;
+		marker.icon.scaledSize.height = 22;
+		marker.setZIndex(1002);
+	}
+	AddRoadTravelConditionsContent("Chain",fn);
+}
+
+function AddRWISContent() {
+	var fn = function(marker,i){
+		marker.position = new google.maps.LatLng(RoadTravelConditionsArrays["RWIS"][i].latitude, RoadTravelConditionsArrays["RWIS"][i].longitude)
+		marker.title = 'RWIS'
+		marker.elementtype = "RWIS";
+		if (RoadTravelConditionsArrays["RWIS"][i].icon == 'rwiscold') {
+			marker.icon.url = '/icons/RoadTravelConditions/rwiscold.png';
+		}
+		else {
+			marker.icon.url = '/icons/RoadTravelConditions/rwis.png';
+		}
+		marker.icon.scaledSize.width = 20;
+		marker.icon.scaledSize.height = 20;
+		marker.setZIndex(1001);
+	}
+	AddRoadTravelConditionsContent("RWIS",fn);
+}
+
+function AddRoadInfoContent() {  // this layer is different form the others because it's json isn't already loaded.
+	var fn = function(marker,i){ // marker add function
+		marker.position = new google.maps.LatLng(RoadTravelConditionsArrays["RoadInfo"][i].latitude, RoadTravelConditionsArrays["RoadInfo"][i].longitude);
+		marker.title = 'RoadInfo';
+		marker.elementtype = "RoadInfo";
+		if (RoadTravelConditionsArrays["RoadInfo"][i].typeabbr == 'C') {
+			marker.icon.url = '/icons/RoadTravelConditions/C.png';
+		}
+		else if (RoadTravelConditionsArrays["RoadInfo"][i].typeabbr == 'CV') {
+			marker.icon.url = '/icons/RoadTravelConditions/CV.png';
+		}
+		else if (RoadTravelConditionsArrays["RoadInfo"][i].typeabbr == 'I') {
+			marker.icon.url = '/icons/RoadTravelConditions/I.png';
+		}
+		else if (RoadTravelConditionsArrays["RoadInfo"][i].typeabbr == 'M') {
+			marker.icon.url = '/icons/RoadTravelConditions/M.png';
+		}
+		marker.icon.scaledSize.width = 20;
+		marker.icon.scaledSize.height = 20;	
+		marker.setZIndex(1000);
+	}
+	// Checks if json already exits. If so, do the same as the other RoadTravelConditon layers.
+	// Also checks if this layer is active, cause we want to deactivate the layer if it gets clicked a second time before the json loads.
+	if(RoadTravelConditionsArrays["RoadInfo"] != null || RoadTravelConditionsActiveLayers["RoadInfo"] == true) { 
+		AddRoadTravelConditionsContent("RoadInfo",fn);
+	}
+	else{ // Otherwise load the JSON now, and add the markers.(if the markers still need to be added by the time the response comes back)
+		RoadTravelConditionsActiveLayers['RoadInfo'] = true;
+		setURLAndCookies();
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.open("GET",  "/data/ROADINFO/OSS_roadinfo.json", true);
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState == 4) {
+				if(xmlhttp.status == 200) {
+					RoadTravelConditionsArrays["RoadInfo"] = JSON.parse(xmlhttp.responseText)[0];
+					document.getElementById("splash-panel").innerHTML += "<br>Done Downloading Road Info Data ...";
+					if(MenuVariable == "RoadTravelConditions" && RoadTravelConditionsActiveLayers['RoadInfo'] == true){// only add markers if this layer is still on when markers are done generating
+						var done = function(){
+							RoadTravelConditionsMarkersGenerated["RoadInfo"] = true; // Markers are now generated.
+							if(RoadTravelConditionsActiveLayers["RoadInfo"] == false){
+								clearMarkers(layer);
+								return;
+							}
+							RoadTravelConditionsActiveLayers["RoadInfo"] = true;
+							setURLAndCookies();
+							document.getElementById("RoadInfoButton").checked = true;
+							LogAnalyticsEvent('Layer', 'RTC_RoadInfo', 'CHECK');
+							checkIfAllChecked()
+						}
+						asyncAddMarkers(RoadTravelConditionsArrays["RoadInfo"].length,fn,done,true);
+					}
+				} else { // failure: disable layer
+					document.getElementById("splash-panel").innerHTML += "<br>Failed Downloading Road Info Data ...";
+					document.getElementById("RoadInfo").onclick = function(){
+						alert("RoadInfo layer could not be loaded. Refresh the page to try agian.");
+					};
+					document.getElementById("RoadInfo").className = "menuitem disabled";
+					RoadTravelConditionsArrays["RoadInfo"] = false;
+                                        //Log analytics
+                                        LogAnalyticsEvent("FailedLayerLoad", "Road Info", "") 
+				}
+			}
+		};
+		xmlhttp.send();
+	}
+}
+
+// This function toggles the traffic layer on and off. 
+function AddTrafficContent() {
+	var check = document.getElementById("TrafficButton");
+	if (RoadTravelConditionsActiveLayers["Traffic"] == true){
+		RoadTravelConditionsArrays["Traffic"].setMap(null);
+		RoadTravelConditionsActiveLayers["Traffic"] = false;
+		check.checked = false;
+		LogAnalyticsEvent('Layer', 'RTC_Traffic', 'UNCHECK');
+		document.getElementById("CheckAllButton").checked = false;
+	}
+	else {
+		RoadTravelConditionsArrays["Traffic"].setMap(map);
+		RoadTravelConditionsActiveLayers["Traffic"] = true;
+		check.checked = true;
+		LogAnalyticsEvent('Layer', 'RTC_Traffic', 'CHECK');
+		checkIfAllChecked()
+	}
+}
+//***************************************** End Road Travel Conditions Menu Items ************************************//
+
+//**********************************  Current Weather Menu Items ***************************************************//
+// This section adds/removes the Current Weather layers.
+function AddCurrentWeatherContent(layer,legend,fn,url,text) {
+	if(CurrentWeatherLayer == layer) // if already current layer then do nothing
+		return;
+	if(CurrentWeatherLayer != null)  { // clears other layer if there is currently one.
+		document.getElementById(CurrentWeatherLayer + "Status").className = "statusicon";
+		CurrentWeatherLayer = null;
+		WxOverlay.setMap(null);
+	}
+	var done = function(){
+		if(CurrentWeatherLayer == layer){
+			document.getElementById(layer + "Status").className = "statusicon check";
+			LogAnalyticsEvent('Layer', 'Current_'+layer, 'SELECT');
+		}
+	}
+	//sets this as the current layer
+	document.getElementById(layer + "Status").className = "statusicon loader";
+	CurrentWeatherLayer = layer;
+	setURLAndCookies();
+	if(layer == "AHPS"){ // AHPS is the only one that has an overlay.
+		WxOverlay.set("url","/data/AHPS/ahpsmap.png");
+		WxOverlay.setMap(map);
+	}
+	setLegend(legend);
+	if(CurrentWeatherArrays[layer] != null){ // adds markers if tthe json is already loaded
+		asyncAddMarkers(CurrentWeatherArrays[layer].length,fn,done,false);
+	} 
+	else {// loads the json then adds the markers.
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.open("GET", url, true);
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				CurrentWeatherArrays[layer] = JSON.parse(xmlhttp.responseText)[0];
+				if(MenuVariable == "CurrentWeather" && CurrentWeatherLayer == layer) // add only if layer is still active
+					asyncAddMarkers(CurrentWeatherArrays[layer].length,fn,done,false);
+				else // otherwise uncheck this layer.
+					document.getElementById(layer+ "Status").className = "statusicon";
+			}
+			if (xmlhttp.readyState == 4 && xmlhttp.status != 200) { // failure: disables this layer
+				if(CurrentWeatherLayer == layer){
+					CurrentWeatherLayer = null;
+					WxOverlay.setMap(null); // This is for the APHS layer, but it doesn't hurt to do it on any layer that reaches this point.
+					setURLAndCookies();
+				}
+				document.getElementById(layer).onclick = function(){
+					alert(text + " layer could not be loaded. Refresh the page to try agian.");
+				};
+				document.getElementById(layer).className = "menuitem disabled";
+				CurrentWeatherArrays[layer] = false;
+                                //Log analytics
+                                LogAnalyticsEvent("FailedLayerLoad", layer, "") 
+			}
+		};
+		xmlhttp.send();
+	}
+}
+
+// each of these define the marker function then calls AddCurrentWeatherContent.
+function AddCurrentAirTemperatureContent() {
+	var fn = function(marker,i){
+		marker.position = new google.maps.LatLng(CurrentWeatherArrays["CurrentAirTemperature"][i].latitude, CurrentWeatherArrays["CurrentAirTemperature"][i].longitude)
+		marker.title = 'AirTemperature'
+		marker.elementtype = "CurrentAirTemperature";
+		var value = parseInt(CurrentWeatherArrays["CurrentAirTemperature"][i].value1[0]);
+		if(value < -40)
+			value = -40;
+		if(value > 130)
+			value = 130;
+		marker.icon.url = '/icons/AirTemp/' + value + '.png';
+		marker.properties.zoom = ZoomLevels[CurrentWeatherArrays["CurrentAirTemperature"][i].zoom];
+	}
+	AddCurrentWeatherContent("CurrentAirTemperature","temp",fn,"/data/CURRENT_WEATHER/OSS/AirTemp.json","Air Temperature");
+}
+
+function AddHumidityContent() { 
+	var fn = function(marker,i){
+		marker.position = new google.maps.LatLng(CurrentWeatherArrays["Humidity"][i].latitude, CurrentWeatherArrays["Humidity"][i].longitude)
+		marker.title = 'Humidity'
+		marker.elementtype = "Humidity";
+		marker.icon.url = '/icons/Humidity/' + CurrentWeatherArrays["Humidity"][i].value1[0] + '.png';
+		marker.properties.zoom = ZoomLevels[CurrentWeatherArrays["Humidity"][i].zoom];
+	}
+	AddCurrentWeatherContent("Humidity","Humidity",fn,"/data/CURRENT_WEATHER/OSS/Humidity.json","Humidity");
+}
+
+function AddPrecipitation1hourContent() { 
+	var fn = function(marker,i){
+		marker.position = new google.maps.LatLng(CurrentWeatherArrays["Precipitation1hour"][i].latitude, CurrentWeatherArrays["Precipitation1hour"][i].longitude)
+		marker.title = 'Precipitation1hour'
+		marker.elementtype = "Precipitation1hour";
+		var value = CurrentWeatherArrays["Precipitation1hour"][i].value1[0]
+		setPrecipIcon(marker,value);
+		marker.properties.zoom = ZoomLevels[CurrentWeatherArrays["Precipitation1hour"][i].zoom];
+	}
+	AddCurrentWeatherContent("Precipitation1hour","precip",fn,"/data/CURRENT_WEATHER/OSS/Precip1hr.json","1 Hour Precipitation");
+}
+
+function AddPrecipitationt24hourContent() { 
+	var fn = function(marker,i){
+		marker.position = new google.maps.LatLng(CurrentWeatherArrays["Precipitationt24hour"][i].latitude, CurrentWeatherArrays["Precipitationt24hour"][i].longitude)
+		marker.title = 'Precipitationt24hour'
+		marker.elementtype = "Precipitationt24hour";
+		var value = CurrentWeatherArrays["Precipitationt24hour"][i].value1[0]
+		setPrecipIcon(marker,value);
+		marker.properties.zoom = ZoomLevels[CurrentWeatherArrays["Precipitationt24hour"][i].zoom];
+	}
+	AddCurrentWeatherContent("Precipitationt24hour","precip",fn,"/data/CURRENT_WEATHER/OSS/Precip24hr.json","24 Hour Precipitation")
+}
+
+function AddAHPSContent() {  // This one is a bit different because it has a wxoverlay, but AddCurrentWeatherContent takes care of this.
+	function fn(marker,i){
+		marker.position = new google.maps.LatLng(CurrentWeatherArrays["AHPS"][i].latitude, CurrentWeatherArrays["AHPS"][i].longitude)
+		marker.title = 'AHPS'
+		marker.elementtype = "AHPS";
+		var value = CurrentWeatherArrays["AHPS"][i].value;
+		setPrecipIcon(marker,value);
+		marker.properties.content = value;
+		marker.properties.zoom = ZoomLevels[CurrentWeatherArrays["AHPS"][i].zoom];
+		marker.properties.noscale = true;
+	}
+	AddCurrentWeatherContent("AHPS","precip",fn,"/data/AHPS/AHPS.json","AHPS")
+}
+
+function AddWindContent() { 
+	var fn = function(marker,i){
+		marker.position = new google.maps.LatLng(CurrentWeatherArrays["Wind"][i].latitude, CurrentWeatherArrays["Wind"][i].longitude)
+		marker.title = 'Wind'
+		marker.elementtype = "Wind";
+		var value1 = CurrentWeatherArrays["Wind"][i].value1[0];
+		var value2 = CurrentWeatherArrays["Wind"][i].value2[0];
+		setWindIcon(marker,value1,value2);
+		marker.properties.zoom = ZoomLevels[CurrentWeatherArrays["Wind"][i].zoom];
+	}
+	AddCurrentWeatherContent("Wind","wind",fn,"/data/CURRENT_WEATHER/OSS/Wind.json","Wind")
+}
+//********************************** End Current Weather Menu Items ***************************************************//
+
+//*********************************************** Forecast Weather Menu Items ***************************************//
+// Add marker function for the forecast weather layers
+function AddForecastMarkers(layer,url,fn){
+	var timeObj = document.getElementById("time");
+	var time = ForecastWeatherArrays[layer][timeObj.selectedIndex];
+	ForecastWeatherLayerAndTime = ForecastWeatherLayer + time;
+	setURLAndCookies();
+	closeInfoWindow();
+	if(ForecastMarkers[layer][time]){ // if layer/time json are alreadyloaded just add the markers.
+		asyncAddMarkers(ForecastMarkers[layer][time].length,fn,function(){},false); // there is no done function in these layers
+	}
+	else{ // Otherwise load the json then add the markers
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.open("GET", "/data/FORECAST_WEATHER/"+time+"/" + url + ".json", true);
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				ForecastMarkers[layer][time] = JSON.parse(xmlhttp.responseText)[0];
+				
+				if(MenuVariable == "ForecastWeather" && ForecastWeatherLayerAndTime == layer + time){ // only add markers if this layer is still active
+					asyncAddMarkers(ForecastMarkers[layer][time].length,fn,function(){},false);
+				}
+			}
+			if (xmlhttp.readyState == 4 && xmlhttp.status != 200) {
+				clearAllMarkers();
+				alert("Markers were unable to load");
+                                //Log analytics
+                                LogAnalyticsEvent("FailedLayerLoad", layer, "") 
+			}
+		};
+		xmlhttp.send();
+	}
+}
+
+// each of these functions define the marker function, then calls AddForecastMarkers.
+function AddWeatherMarkers() {
+	var timeObj = document.getElementById("time");
+	var time = ForecastWeatherArrays["Weather"][timeObj.selectedIndex];
+	function fn(marker,i){
+		marker.position = new google.maps.LatLng(ForecastMarkers["Weather"][time][i].latitude, ForecastMarkers["Weather"][time][i].longitude);
+		marker.elementtype = "Weather" + time;
+		var value = ForecastMarkers["Weather"][time][i].value;
+		marker.icon.url = '/icons/wx/' + value + '.png';
+		marker.properties.zoom = ZoomLevels[ForecastMarkers["Weather"][time][i].zoom];
+		marker.properties.content = ForecastMarkers["Weather"][time][i].id;
+		marker.properties.noscale = true;
+	}
+	AddForecastMarkers("Weather","wx",fn);
+}
+function AddForecastAirTemperatureMarkers() {
+	var timeObj = document.getElementById("time");
+	var time = ForecastWeatherArrays["ForecastAirTemperature"][timeObj.selectedIndex];
+	function fn(marker,i){
+		marker.position = new google.maps.LatLng(ForecastMarkers["ForecastAirTemperature"][time][i].latitude, ForecastMarkers["ForecastAirTemperature"][time][i].longitude);
+		marker.elementtype = "ForecastAirTemperature" + time;
+		var value = ForecastMarkers["ForecastAirTemperature"][time][i].value;
+		marker.icon.url = '/icons/AirTemp/' + value + '.png';
+		marker.properties.content = value + "&deg;F";
+		marker.properties.zoom = ZoomLevels[ForecastMarkers["ForecastAirTemperature"][time][i].zoom];
+		marker.properties.noscale = true;
+	}
+	AddForecastMarkers("ForecastAirTemperature","temp",fn);
+}
+function AddWindSpeedMarkers() {
+	var timeObj = document.getElementById("time");
+	var time = ForecastWeatherArrays["WindSpeed"][timeObj.selectedIndex];
+	function fn(marker,i){
+		marker.position = new google.maps.LatLng(ForecastMarkers["WindSpeed"][time][i].latitude, ForecastMarkers["WindSpeed"][time][i].longitude);
+		marker.elementtype = "WindSpeed" + time;
+		var value1 = parseInt(ForecastMarkers["WindSpeed"][time][i].value);
+		var value2 = parseInt(ForecastMarkers["WindSpeed"][time][i].value2);
+		setWindIcon(marker,value1,value2);
+		marker.properties.content = value1 + " mph from " + value2 + "&deg;";
+		marker.properties.zoom = ZoomLevels[ForecastMarkers["WindSpeed"][time][i].zoom];
+		marker.properties.noscale = true;
+	}
+	AddForecastMarkers("WindSpeed","wspd",fn);
+}
+function AddWindGustSpeedMarkers() {
+	var timeObj = document.getElementById("time");
+	var time = ForecastWeatherArrays["WindGustSpeed"][timeObj.selectedIndex];
+	function fn(marker,i){
+		marker.position = new google.maps.LatLng(ForecastMarkers["WindGustSpeed"][time][i].latitude, ForecastMarkers["WindGustSpeed"][time][i].longitude);
+		marker.elementtype = "WindGustSpeed" + time;
+		var value1 = parseInt(ForecastMarkers["WindGustSpeed"][time][i].value);
+		var value2 = parseInt(ForecastMarkers["WindGustSpeed"][time][i].value2);
+		setWindIcon(marker,value1,value2);		
+		marker.properties.content = value1 + " mph from " + value2 + "&deg;";			
+		marker.properties.zoom = ZoomLevels[ForecastMarkers["WindGustSpeed"][time][i].zoom];
+		marker.properties.noscale = true;
+	}
+	AddForecastMarkers("WindGustSpeed","wgust",fn);
+}
+function AddForecastHumidityMarkers() {
+	var timeObj = document.getElementById("time");
+	var time = ForecastWeatherArrays["ForecastHumidity"][timeObj.selectedIndex];
+	function fn(marker,i){
+		marker.position = new google.maps.LatLng(ForecastMarkers["ForecastHumidity"][time][i].latitude, ForecastMarkers["ForecastHumidity"][time][i].longitude);
+		marker.elementtype = "ForecastHumidity" + time;
+		var value = ForecastMarkers["ForecastHumidity"][time][i].value;
+		marker.icon.url = '/icons/Humidity/' + value + '.png';
+		marker.properties.content = value + "%";
+		marker.properties.zoom = ZoomLevels[ForecastMarkers["ForecastHumidity"][time][i].zoom];
+		marker.properties.noscale = true;
+	}
+	AddForecastMarkers("ForecastHumidity","rhm",fn);
+}
+function AddSkyCoverMarkers() {
+	var timeObj = document.getElementById("time");
+	var time = ForecastWeatherArrays["SkyCover"][timeObj.selectedIndex];
+	function fn(marker,i){
+		marker.position = new google.maps.LatLng(ForecastMarkers["SkyCover"][time][i].latitude, ForecastMarkers["SkyCover"][time][i].longitude);
+		marker.elementtype = "SkyCover" + time;
+		var value = ForecastMarkers["SkyCover"][time][i].value;
+		marker.icon.url = '/icons/Skycover/' + value + '.png';
+		marker.properties.content = value + "%";
+		marker.properties.zoom = ZoomLevels[ForecastMarkers["SkyCover"][time][i].zoom];
+		marker.properties.noscale = true;
+	}
+	AddForecastMarkers("SkyCover","sky",fn);
+}
+function AddPrecipitation12hourMarkers() {
+	var timeObj = document.getElementById("time");
+	var time = ForecastWeatherArrays["Precipitation12hour"][timeObj.selectedIndex];
+	function fn(marker,i){
+		marker.position = new google.maps.LatLng(ForecastMarkers["Precipitation12hour"][time][i].latitude, ForecastMarkers["Precipitation12hour"][time][i].longitude);
+		marker.elementtype = "Precipitation12hour" + time;
+		var value = ForecastMarkers["Precipitation12hour"][time][i].value;
+		if(value < .01){
+			marker.icon.url = '/icons/pop12/' + value + '.png';
+			marker.icon.scaledSize.width = 20;
+			marker.icon.scaledSize.height = 20;
+		}
+		else
+			marker.icon.url = '/icons/pop12/' + value + '.png';
+		marker.properties.content = value + "%";
+		marker.properties.zoom = ZoomLevels[ForecastMarkers["Precipitation12hour"][time][i].zoom];
+		marker.properties.noscale = true;
+	}
+	AddForecastMarkers("Precipitation12hour","pop12",fn);
+}
+function AddPrecipitation6hourMarkers() {
+	var timeObj = document.getElementById("time");
+	var time = ForecastWeatherArrays["Precipitation6hour"][timeObj.selectedIndex];
+	function fn(marker,i){
+		marker.position = new google.maps.LatLng(ForecastMarkers["Precipitation6hour"][time][i].latitude, ForecastMarkers["Precipitation6hour"][time][i].longitude);
+		marker.elementtype = "Precipitation6hour" + time;
+		var value = ForecastMarkers["Precipitation6hour"][time][i].value;
+		setPrecipIcon(marker,value);
+		marker.properties.content = value + "in.";
+		marker.properties.zoom = ZoomLevels[ForecastMarkers["Precipitation6hour"][time][i].zoom];
+		marker.properties.noscale = true;
+	}
+	AddForecastMarkers("Precipitation6hour","qpf",fn);
+}
+function AddSnowMarkers() {
+	var timeObj = document.getElementById("time");
+	var time = ForecastWeatherArrays["Snow"][timeObj.selectedIndex];
+	function fn(marker,i){
+		marker.position = new google.maps.LatLng(ForecastMarkers["Snow"][time][i].latitude, ForecastMarkers["Snow"][time][i].longitude);
+		marker.elementtype = "Snow" + time;
+		var value = ForecastMarkers["Snow"][time][i].value;
+		if(value > 6)
+			value = 6
+		if(value < .1){
+			marker.icon.url = '/icons/snow/' + value + '.png';
+			marker.icon.scaledSize.width = 20;
+			marker.icon.scaledSize.height = 20;
+		}
+		else
+			marker.icon.url = '/icons/snow/' + value + '.png';
+		marker.properties.content = value + "in.";
+		marker.properties.zoom = ZoomLevels[ForecastMarkers["Snow"][time][i].zoom];
+		marker.properties.noscale = true;
+	}
+	AddForecastMarkers("Snow","snow",fn);
+}
+
+// Add content functions for forecast layers (load inital overlay and generate html for time selector)
+// Weather is for both the forecast and road/travel conditions
+function AddWeatherContent(current) { //If current = true this means that the call is for road/travel conditions.
+	//Grabs currently selected value form #time or sets it to 0 if current = true
+	var timeObj = document.getElementById("time");
+	var check = document.getElementById("WeatherButton");
+	if(current){ // road/travel conditions only displays the inital overlay
+		if(RoadTravelConditionsActiveLayers["Weather"] == true && current){ //turning off the layer
+			WxOverlay.setMap(null);
+			RoadTravelConditionsActiveLayers["Weather"] = false;
+			setURLAndCookies();
+			check.checked = false;
+			LogAnalyticsEvent('Layer', 'RTC_Weather', 'UNCHECK');
+			document.getElementById("CheckAllButton").checked = false;
+		}
+		else{ // turns the layer on
+			//checks if the image exists before using it
+			var checkimage = true;
+			while(checkimage){
+				checkimage = false;
+				var imghttp = new XMLHttpRequest();
+				imghttp.open("HEAD",'/data/FORECAST_WEATHER/' + ForecastWeatherArrays["Weather"][0] + '/wx.png',false);
+				imghttp.onreadystatechange = function() {
+					if(imghttp.readyState == 4 && imghttp.status != 200){ //this image doesn't exists.
+						//removes this index form all places it exists in the code, and changes the time's selection.
+						ForecastWeatherArrays["Weather"].splice(0,1);
+						timeObj[0].remove();
+						ForecastTimeHTML["Weather"] = ForecastTimeHTML["Weather"].split("</option>").splice(0,1).join("</option>");
+						checkimage = true;
+						if(timeObj.selectedIndex == 0){ // if the last element gets deleted the selector sets it to 0, this sets it back to the last element.
+							timeObj.selectedIndex = selectedTime -1;
+							if(timeObj.selectedIndex == -1){ // none of the images work
+								checkimage = false;
+							}
+						}
+					}
+				}
+				imghttp.send();
+			}
+			var wxURL = '/data/FORECAST_WEATHER/' + ForecastWeatherArrays["Weather"][0] + '/wx.png';	
+			WxOverlay.set("url",wxURL);
+			WxOverlay.setMap(map);
+			RoadTravelConditionsActiveLayers["Weather"] = true;
+			setURLAndCookies();
+			check.checked = true;
+			LogAnalyticsEvent('Layer', 'RTC_Weather', 'CHECK');
+			checkIfAllChecked();
+		}
+	}
+	else{ // forecast layers
+		if(ForecastWeatherLayer == "Weather"){ // time change
+			WxOverlay.setMap(null);
+			//checks if the image exists before using it
+			var checkimage = true;
+			while(checkimage){
+				checkimage = false;
+				var selectedTime = timeObj.selectedIndex;
+				var imghttp = new XMLHttpRequest();
+				imghttp.open("HEAD",'/data/FORECAST_WEATHER/' + ForecastWeatherArrays["Weather"][selectedTime] + '/wx.png',false);
+				imghttp.onreadystatechange = function() {
+					if(imghttp.readyState == 4 && imghttp.status != 200){ //this image doesn't exists.
+						//removes this index form all places it exists in the code, and changes the time's selection.
+						ForecastWeatherArrays["Weather"].splice(selectedTime,1);
+						timeObj[selectedTime].remove();
+						ForecastTimeHTML["Weather"] = ForecastTimeHTML["Weather"].split("</option>").splice(selectedTime,1).join("</option>");
+						checkimage = true;
+						timeObj.selectedIndex = selectedTime;
+						if(selectedTime == timeObj.length){ // Time selector moves everything to 0 when you remove an object
+							timeObj.selectedIndex = selectedTime -1;
+							if(timeObj.selectedIndex == -1){ // none of the images work
+								checkimage = false;
+							}
+						}
+					}
+				}
+				imghttp.send();
+			}
+			var wxURL = '/data/FORECAST_WEATHER/' + ForecastWeatherArrays["Weather"][timeObj.selectedIndex] + '/wx.png';	
+			WxOverlay.set("url",wxURL);
+			WxOverlay.setMap(map);
+			AddWeatherMarkers();
+			setLegend("wx");
+			setURLAndCookies();
+			return;
+		}
+		if(ForecastWeatherLayer != null)  { // clears other layer if there is currently one.
+			document.getElementById(ForecastWeatherLayer + "Status").className = "statusicon";
+			ForecastWeatherLayer = null;
+			WxOverlay.setMap(null);
+		}
+		// sets this layer as the current layer
+		var check = document.getElementById("WeatherStatus");
+		ForecastWeatherLayer = "Weather";
+		check.className = "statusicon check";
+		timeObj.innerHTML = ForecastTimeHTML[ForecastWeatherLayer];
+		timeObj.onchange = function() {
+			LogAnalyticsEvent('TimeSelect', 'Weather', ForecastWeatherArrays["Weather"][0]);
+			AddWeatherContent(false);
+		};
+		WxOverlay.setMap(null);
+		//checks if the image exists before using it
+		var checkimage = true;
+		while(checkimage){
+			checkimage = false;
+			var selectedTime = timeObj.selectedIndex;
+			var imghttp = new XMLHttpRequest();
+			imghttp.open("HEAD",'/data/FORECAST_WEATHER/' + ForecastWeatherArrays["Weather"][selectedTime] + '/wx.png',false);
+			imghttp.onreadystatechange = function() {
+				if(imghttp.readyState == 4 && imghttp.status != 200){ //this image doesn't exists.
+					//removes this index form all places it exists in the code, and changes the time's selection.
+					ForecastWeatherArrays["Weather"].splice(selectedTime,1);
+					timeObj[selectedTime].remove();
+					ForecastTimeHTML["Weather"] = ForecastTimeHTML["Weather"].split("</option>").splice(selectedTime,1).join("</option>");
+					checkimage = true;
+					timeObj.selectedIndex = selectedTime;
+					if(selectedTime == timeObj.length){ // Time selector moves everything to 0 when you remove an object
+						timeObj.selectedIndex = selectedTime -1;
+						if(timeObj.selectedIndex == -1){ // none of the images work
+							checkimage = false;
+						}
+					}
+				}
+			}
+			imghttp.send();
+		}
+		var wxURL = '/data/FORECAST_WEATHER/' + ForecastWeatherArrays["Weather"][timeObj.selectedIndex] + '/wx.png';	
+		WxOverlay.set("url",wxURL);
+		WxOverlay.setMap(map);
+		try { // for when the page initially loads, select the time that is in the url if the time exists in our data
+			var urllayerinfo = /layer=([^&\#]+)/.exec(window.location.href)[1].split("_");
+			var urllayer = urllayerinfo[0];
+			if(urllayer == "ForecastWeather" && urllayerinfo[1] == ForecastWeatherLayer){
+				var timeindex = ForecastWeatherArrays[ForecastWeatherLayer].indexOf(parseInt(urllayerinfo[2]));
+				if(timeindex != -1){ //if url time is found in layers than select it.
+					document.getElementById("time").selectedIndex = timeindex;
+					document.getElementById("time").onchange();
+				}
+				return;
+			}
+		} catch (e){
+
+		}
+		setURLAndCookies();
+		AddWeatherMarkers();
+		setLegend("wx");
+		LogAnalyticsEvent('Layer', 'Forecast_Weather', 'SELECT');
+	}
+}
+// function to add the forecast weather content for all forecast weather layers except for weather.
+function AddForecastContent(layer,url,legend,contentfn,markerfn,text){
+	var timeObj = document.getElementById("time");
+	if(ForecastWeatherLayer == layer){ // time change, switch overlay/markers to the current time
+		WxOverlay.setMap(null);
+		//checks if the image exists before using it
+		var checkimage = true;
+		while(checkimage){
+			checkimage = false;
+			var selectedTime = timeObj.selectedIndex;
+			var imghttp = new XMLHttpRequest();
+			imghttp.open("HEAD",'/data/FORECAST_WEATHER/' + ForecastWeatherArrays[layer][selectedTime] + '/'+url+'.png',false);
+			imghttp.onreadystatechange = function() {
+				if(imghttp.readyState == 4 && imghttp.status != 200){ //this image doesn't exists.
+					//removes this index form all places it exists in the code, and changes the time's selection.
+					ForecastWeatherArrays[layer].splice(selectedTime,1);
+					timeObj[selectedTime].remove();
+					ForecastTimeHTML[layer] = ForecastTimeHTML[layer].split("</option>").splice(selectedTime,1).join("</option>");
+					checkimage = true;
+					timeObj.selectedIndex = selectedTime;
+					if(selectedTime == timeObj.length){ // Time selector moves everything to 0 when you remove an object
+						timeObj.selectedIndex = selectedTime -1;
+						if(timeObj.selectedIndex == -1){ // none of the images work
+							checkimage = false;
+						}
+					}
+				}
+			}
+			imghttp.send();
+		}
+		var wxURL = '/data/FORECAST_WEATHER/' + ForecastWeatherArrays[layer][timeObj.selectedIndex] + '/'+url+'.png';	
+		WxOverlay.set("url",wxURL);
+		WxOverlay.setMap(map);
+		setURLAndCookies();
+		markerfn();
+		setLegend(legend);
+		return;
+	}
+	if(ForecastWeatherLayer != null)  { // clears other layer if there is currently one.
+		document.getElementById(ForecastWeatherLayer + "Status").className = "statusicon";
+		ForecastWeatherLayer = null;
+		WxOverlay.setMap(null);
+	}
+	var check = document.getElementById(layer + "Status");
+	if(CurrentWeatherArrays[layer] != null){ // JSON already loaded, add this layer
+		ForecastWeatherLayer = layer;
+		check.className = "statusicon check";
+		timeObj.innerHTML = ForecastTimeHTML[layer];
+		timeObj.onchange = function() { // makes the time selector activate this function
+			var timeObj = document.getElementById("time");
+			LogAnalyticsEvent('TimeSelect', layer, ForecastWeatherArrays[layer][timeObj.selectedIndex]);
+			contentfn();
+		};
+		
+		//checks if the image exists before using it
+		var checkimage = true;
+		while(checkimage){
+			checkimage = false;
+			var selectedTime = timeObj.selectedIndex;
+			var imghttp = new XMLHttpRequest();
+			imghttp.open("HEAD",'/data/FORECAST_WEATHER/' + ForecastWeatherArrays[layer][selectedTime] + '/'+url+'.png',false);
+			imghttp.onreadystatechange = function() {
+				if(imghttp.readyState == 4 && imghttp.status != 200){ //this image doesn't exists.
+					//removes this index form all places it exists in the code, and changes the time's selection.
+					ForecastWeatherArrays[layer].splice(selectedTime,1);
+					timeObj[selectedTime].remove();
+					ForecastTimeHTML[layer] = ForecastTimeHTML[layer].split("</option>").splice(selectedTime,1).join("</option>");
+					checkimage = true;
+					timeObj.selectedIndex = selectedTime;
+					if(selectedTime == timeObj.length){ // Time selector moves everything to 0 when you remove an object
+						timeObj.selectedIndex = selectedTime -1;
+						if(timeObj.selectedIndex == -1){ // none of the images work
+							checkimage = false;
+						}
+					}
+				}
+			}
+			imghttp.send();
+		}
+		
+		var wxURL = '/data/FORECAST_WEATHER/' + ForecastWeatherArrays[layer][timeObj.selectedIndex] + '/'+url+'.png';	
+		WxOverlay.set("url",wxURL);
+		WxOverlay.setMap(map);
+		setURLAndCookies();
+		markerfn();
+		setLegend(legend);
+		LogAnalyticsEvent('Layer', 'Forecast_'+layer, 'SELECT');
+	}
+	else{ // otherwise load the json, then add this layer.
+		check.className = "statusicon loader";
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.open("GET", "/data/FORECAST_WEATHER/"+url+ ".json", true);
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				ForecastWeatherArrays[layer] = JSON.parse(xmlhttp.responseText);
+				//generates html for the time selector
+				var weatherMenuHTML = "";
+				for (var i=0; i < ForecastWeatherArrays[layer].length; i++) {
+					var tempvar = ForecastWeatherArrays[layer][i];
+					weatherMenuHTML += '<option id=Weathermenu' + i + '" value="'+tempvar.toString()+'" >' + formatDate2(tempvar.toString()) + '</option>';
+				}
+				ForecastTimeHTML[layer] = weatherMenuHTML;
+				var check = document.getElementById(layer + "Status");
+				check.className = "statusicon";
+				if(ForecastWeatherLayer == null){ // if this layer is still active, set the overlay and content of the time selector. 
+					ForecastWeatherLayer = layer;
+					check.className = "statusicon check";
+					var timeObj = document.getElementById("time");
+					timeObj.innerHTML = ForecastTimeHTML[layer];
+					timeObj.onchange = function() {
+						var timeObj = document.getElementById("time");
+						LogAnalyticsEvent('TimeSelect', layer, ForecastWeatherArrays[layer][timeObj.selectedIndex]);
+						contentfn();
+					};
+					//checks if the image exists before using it
+					var checkimage = true;
+					while(checkimage){
+						checkimage = false;
+						var selectedTime = timeObj.selectedIndex;
+						var imghttp = new XMLHttpRequest();
+						imghttp.open("HEAD",'/data/FORECAST_WEATHER/' + ForecastWeatherArrays[layer][selectedTime] + '/'+url+'.png',false);
+						imghttp.onreadystatechange = function() {
+							if(imghttp.readyState == 4 && imghttp.status != 200){ //this image doesn't exists.
+								//removes this index form all places it exists in the code, and changes the time's selection.
+								ForecastWeatherArrays[layer].splice(selectedTime,1);
+								timeObj[selectedTime].remove();
+								ForecastTimeHTML[layer] = ForecastTimeHTML[layer].split("</option>").splice(selectedTime,1).join("</option>");
+								checkimage = true;
+								timeObj.selectedIndex = selectedTime;
+								if(selectedTime == timeObj.length){ // Time selector moves everything to 0 when you remove an object
+									timeObj.selectedIndex = selectedTime -1;
+									if(timeObj.selectedIndex == -1){ // none of the images work
+										checkimage = false;
+									}
+								}
+							}
+						}
+						imghttp.send();
+					}
+					
+					var wxURL = '/data/FORECAST_WEATHER/' + ForecastWeatherArrays[layer][timeObj.selectedIndex] + '/'+url+'.png';
+					WxOverlay.set("url",wxURL);
+					WxOverlay.setMap(map);
+					
+					try { // This is for the inital load, if the url contains time for this layer to be one.  
+						var urllayerinfo = /layer=([^&\#]+)/.exec(window.location.href)[1].split("_");
+						var urllayer = urllayerinfo[0];
+						if(urllayer == "ForecastWeather" && urllayerinfo[1] == ForecastWeatherLayer){
+							var timeindex = ForecastWeatherArrays[ForecastWeatherLayer].indexOf(parseInt(urllayerinfo[2]));
+							if(timeindex != -1){ //if url time is found in layers than select it.
+								document.getElementById("time").selectedIndex = timeindex;
+								document.getElementById("time").onchange();
+							}
+							return;
+						}
+					} catch (e){
+
+					}
+					setURLAndCookies();
+					markerfn();
+					setLegend(legend);
+					LogAnalyticsEvent('Layer', 'Forecast_' + layer, 'SELECT');
+				}
+			}
+			if (xmlhttp.readyState == 4 && xmlhttp.status != 200) {
+				document.getElementById(layer).onclick = function(){
+					alert(text + " layer could not be loaded. Refresh the page to try agian.");
+				};
+				document.getElementById(layer).className = "menuitem disabled";
+				ForecastWeatherArrays[layer] = false;
+                                //Log analytics
+                                LogAnalyticsEvent("FailedLayerLoad", layer, "") 
+			}
+		};
+		xmlhttp.send();
+	}
+}
+
+// These functions each call AddForecastContent for each layer in Forecast layers
+function AddForecastAirTemperatureContent() {
+	AddForecastContent("ForecastAirTemperature","temp","temp",AddForecastAirTemperatureContent,AddForecastAirTemperatureMarkers,"Air Temperature");
+}
+
+function AddWindSpeedContent() {
+	AddForecastContent("WindSpeed","wspd","wind",AddWindSpeedContent,AddWindSpeedMarkers,"Wind Speed");
+}
+
+function AddWindGustSpeedContent() {
+	AddForecastContent("WindGustSpeed","wgust","wind",AddWindGustSpeedContent,AddWindGustSpeedMarkers,"Wind Gust Speed");
+}
+
+function AddForecastHumidityContent() {
+	AddForecastContent("ForecastHumidity","rhm","Humidity",AddForecastHumidityContent,AddForecastHumidityMarkers,"Humidity");
+}
+
+function AddSkyCoverContent() {
+	AddForecastContent("SkyCover","sky","sky",AddSkyCoverContent,AddSkyCoverMarkers,"Sky Cover");
+}
+
+function AddPrecipitation12hourContent() {
+	AddForecastContent("Precipitation12hour","pop12","pop12",AddPrecipitation12hourContent,AddPrecipitation12hourMarkers,"12 Hour Precipitation");
+}
+
+function AddPrecipitation6hourContent() {
+	AddForecastContent("Precipitation6hour","qpf","precip",AddPrecipitation6hourContent,AddPrecipitation6hourMarkers,"6 Hour Precipitation");
+}
+
+function AddSnowContent() {
+	AddForecastContent("Snow","snow","snow",AddSnowContent,AddSnowMarkers,"Snow");
+}
+//****************************** End Forecast Weather Menu items ***************************//
+
+//****************************** Fire Menu Items *******************************************//
+// function to add the fire contnet.
+function AddFireContent(layer,fn,done,legned,url,text){
+	if(FireLayer == layer) // if already current layer then do nothing
+		return;
+	if(FireLayer != null)  { // clears other layer if there is currently one.
+		document.getElementById(FireLayer + "Status").className = "statusicon";
+		FireLayer = null;
+		setURLAndCookies();
+		WxOverlay.setMap(null);
+	}
+
+	// add this layer
+	document.getElementById(layer + "Status").className = "statusicon loader";	
+	FireLayer = layer;
+	setURLAndCookies();
+	setLegend(legned);
+
+	if(FireArrays[layer] != null){ // add markers if json is already loaded
+		asyncAddMarkers(FireArrays[layer].length,fn,done,false);
+	}
+	else{ // load json then add markers
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.open("GET", "/data/FIRE/"+url+".json", true);
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				FireArrays[layer] = JSON.parse(xmlhttp.responseText)[0];
+				
+				if(MenuVariable == "Fire" && FireLayer == layer)
+					asyncAddMarkers(FireArrays[layer].length,fn,done,false);
+				else
+					document.getElementById(layer + "Status").className = "statusicon";	
+			}
+			if (xmlhttp.readyState == 4 && xmlhttp.status != 200) {
+				if(FireLayer == layer){
+					FireLayer = null;
+					setURLAndCookies();
+				}
+				document.getElementById(layer).onclick = function(){
+					alert(text + " layer could not be loaded. Refresh the page to try agian.");
+				};
+				document.getElementById(layer).className = "menuitem disabled";
+				FireArrays[layer] = false
+                                //Log analytics
+                                LogAnalyticsEvent("FailedLayerLoad", layer, "") 
+			}
+			
+		};
+		xmlhttp.send();
+	}
+}
+
+// These two functions define the marker and done functions for the fire layers
+function AddFireIncidentsContent() {
+	function fn(marker,i){
+		marker.position = new google.maps.LatLng(FireArrays["FireIncidents"][i].latitude, FireArrays["FireIncidents"][i].longitude);
+		marker.title = 'FireIncidents';
+		marker.elementtype = "FireIncidents";
+		marker.icon.url = '/icons/wx/Smoke.png';
+	}
+	function done(){
+		document.getElementById("FireIncidentsStatus").className = "statusicon check";
+		LogAnalyticsEvent('Layer', 'Fire_Incidents', 'SELECT');
+	}
+	AddFireContent("FireIncidents",fn,done,"FireIncd","FireIncd","Fire Incidents");
+}
+
+function AddFireDetectorsContent() {
+	function fn(marker,i){
+		marker.position = new google.maps.LatLng(FireArrays["FireDetectors"][i].latitude, FireArrays["FireDetectors"][i].longitude);
+		marker.elementtype = "FireDetectors";
+		marker.title = 'FireDetectors';
+
+		var icon = FireArrays["FireDetectors"][i].icon;
+		marker.icon.url = '/icons/FIRE/'+icon+'.png';
+		marker.icon.scaledSize.width = 15;
+		marker.icon.scaledSize.height = 15;
+
+		marker.properties.zoom = ZoomLevels[FireArrays["FireDetectors"][i].zoom];
+	}
+	function done(){
+		document.getElementById("FireDetectorsStatus").className = "statusicon check";
+		LogAnalyticsEvent('Layer', 'Fire_Detectors', 'SELECT');
+	}
+	AddFireContent("FireDetectors",fn,done,"FireDet","FireDet_filtered","Fire Detectors");
+}
+//*************************************  End Fire Menu Items *****************************************//
+
+//*************************************  Other Info Menu Items ****************************************//
+// function to add the OtherInfo content
+function AddOtherInfoContent(layer,icon,url) {
+	var check = document.getElementById(layer + "Check");
+	if(OtherInfoActiveLayers[layer]){ // if already an active layer then remove layer
+		clearMarkers(layer);
+		check.checked = false;
+		LogAnalyticsEvent('Layer', 'Other_' + layer, 'Unchecked');
+		OtherInfoActiveLayers[layer] = false;
+		setURLAndCookies();
+		return;
+	}
+	// otherwise add the layer
+	function fn(marker,i){
+		marker.position = new google.maps.LatLng(OtherInfoArrays[layer][i].latitude, OtherInfoArrays[layer][i].longitude);
+		marker.title = layer;
+		marker.elementtype = layer;
+		marker.icon.url = icon;
+	}
+	function done(){
+		check.checked = true;
+		LogAnalyticsEvent('Layer', 'Other_' + layer, 'Checked');
+	}
+	OtherInfoActiveLayers[layer] = true;
+	setURLAndCookies();
+
+	if(OtherInfoArrays[layer] != null){ // JSON already loaded
+		asyncAddMarkers(OtherInfoArrays[layer].length,fn,done,true);
+		return;
+	}
+
+	var jsonloaded = function(){ // call back function
+		if(MenuVariable == "OtherInfo" && OtherInfoActiveLayers[layer] == true)
+			asyncAddMarkers(OtherInfoArrays[layer].length,fn,done,true);
+	}
+	var loadLayer = function(){ // creates a xmlhttprequest
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.open("GET", "/data/"+url[0]+"/OSS_"+url[1]+".json", true);
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				OtherInfoArrays[layer] = JSON.parse(xmlhttp.responseText)[0];
+				if(OtherInfoArrays[layer] != null){
+					jsonloaded(); // callback
+				}			
+			}
+			if (xmlhttp.readyState == 4 && xmlhttp.status != 200) {
+				OtherInfoActiveLayers[layer] = false;
+				setURLAndCookies();
+				document.getElementById(layer).onclick = function(){
+					alert(layer+" layer could not be loaded. Refresh the page to try agian.");
+				};
+				document.getElementById(layer).className = "menuitem disabled";
+				OtherInfoArrays[layer] = false;
+                                //Log analytics
+                                LogAnalyticsEvent("FailedLayerLoad", layer, "") 
+			}
+		};
+		xmlhttp.send();
+	}
+	loadLayer();
+}
+
+function AddRestAreasContent() {
+        AddOtherInfoContent("RestAreas","/icons/OtherInfo/rest-area.png",["RESTAREAS","restareas"]);
+}
+function AddSummitLocationsContent() {
+        AddOtherInfoContent("SummitLocations","/icons/OtherInfo/summit.png",["SUMMITS","summits"]);
+}
+function AddTruckScalesContent() {
+        AddOtherInfoContent("TruckScales","/icons/OtherInfo/truck.png",["TRUCKSCALES","truckscales"]);
+}
+function AddFeaturesOfInterestContent() {
+        AddOtherInfoContent("FeaturesOfInterest","/icons/OtherInfo/featuresofinterest.png",["FOI","foi"]);
+}
+//************************************************ End Other Info Menu Items **************************************************//
+
+//**************************************** Menu Controls ***********************************************//
+function incTime () { // Increases time and actiaves the function on the timer.onchange
+	if(MenuVariable != "ForecastWeather")
+		return;
+	var selectTime = document.getElementById("time");
+	if (selectTime.selectedIndex < selectTime.options.length - 1) {
+		selectTime.selectedIndex += 1;
+		selectTime.onchange();
+	}
+}
+
+function decTime () {// Decreases time and actiaves the function on the timer.onchange
+	if(MenuVariable != "ForecastWeather")
+		return;
+	var selectTime = document.getElementById("time");
+	if (selectTime.selectedIndex > 0) {
+		selectTime.selectedIndex -= 1;
+		selectTime.onchange();
+	}
+}
+
+function closeAllactiveTabs(except){ // closes all menu tabs
+	if(except != "RoadTravelConditions"){
+		el = document.getElementById("RoadTravelConditions")
+		el.className = "accordion-section";
+		el.getElementsByClassName("accordion-content")[0].style.maxHeight = "0px";
+	}
+	if(except != "ForecastWeather"){
+		el = document.getElementById("ForecastWeather")
+		el.className = "accordion-section";
+		el.getElementsByClassName("accordion-content")[0].style.maxHeight = "0px";
+	}
+	/*if(except != "CurrentWeather"){
+		el = document.getElementById("CurrentWeather")
+		el.className = "accordion-section";
+		el.getElementsByClassName("accordion-content")[0].style.maxHeight = "0px";
+	}*/
+	if(except != "Fire"){
+		el = document.getElementById("Fire")
+		el.className = "accordion-section";
+		el.getElementsByClassName("accordion-content")[0].style.maxHeight = "0px";
+	}
+	if(except != "OtherInfo"){
+		el = document.getElementById("OtherInfo")
+		el.className = "accordion-section";
+		el.getElementsByClassName("accordion-content")[0].style.maxHeight = "0px";
+	}
+	if(except != "About"){
+		el = document.getElementById("About")
+		el.className = "accordion-section";
+		el.getElementsByClassName("accordion-content")[0].style.maxHeight = "0px";
+	}
+}
+function RemoveAllActiveTabs(){ // removes the markers/overlay for everything
+	RoadTravelConditionsArrays["Traffic"].setMap(null);
+	WxOverlay.setMap(null);//want to delete current overlay no matter what
+	clearAllMarkers();
+	document.getElementById("timeitem").className="closed";
+}
+function scrollintoview(tab){ //scroll a tab into view (for when you are on a small screen)
+	if(!(document.documentMode || /Edge/.test(navigator.userAgent))) // doesn't work on every browser
+		tab.scrollIntoView(true); // this breaks IE and edge for some reason.
+}
+
+function ActivateRoadTravelConditionsTab() {
+	var tab = document.getElementById("RoadTravelConditions");
+	if (tab.className.search("active") >= 0) {
+		closeAllactiveTabs("");
+		return
+	}
+	closeAllactiveTabs("RoadTravelConditions");
+	//scrollintoview(tab)
+	tab.className += " active";
+	var tabcontent = tab.getElementsByClassName("accordion-content")[0];
+	tabcontent.style.maxHeight = (20 + tabcontent.getElementsByClassName("accordion-height")[0].clientHeight) + "px";
+	if(MenuVariable == "RoadTravelConditions")
+		return;
+	MenuVariable = "RoadTravelConditions";
+	RemoveAllActiveTabs();
+	setLegend("RoadTravelConditions");
+	//resets the group of markers, so that they get regenerated when added.
+	RoadTravelConditionsMarkersGenerated = {Incident:false, 
+											Chain:false, 
+											CCTV:false,
+											CMS:false,
+											RWIS:false, 
+											RoadInfo:false};
+	groupindex = 0;
+
+	if(RoadTravelConditionsActiveLayers["Chain"]){
+		RoadTravelConditionsActiveLayers["Chain"] = false;
+		AddChainContent();
+	}
+	if(RoadTravelConditionsActiveLayers["Incident"]){
+		RoadTravelConditionsActiveLayers["Incident"] = false;
+		AddIncidentContent();
+	}
+	if(RoadTravelConditionsActiveLayers["CCTV"]){
+		RoadTravelConditionsActiveLayers["CCTV"] = false;
+		AddCCTVContent();
+	}
+	if(RoadTravelConditionsActiveLayers["CMS"]){
+		RoadTravelConditionsActiveLayers["CMS"] = false;
+		AddCMSContent();
+	}
+	if(RoadTravelConditionsActiveLayers["RWIS"]){
+		RoadTravelConditionsActiveLayers["RWIS"] = false;
+		AddRWISContent();
+	}
+	if(RoadTravelConditionsActiveLayers["RoadInfo"]){
+		RoadTravelConditionsActiveLayers["RoadInfo"] = false;
+		AddRoadInfoContent();
+	}
+	if(RoadTravelConditionsActiveLayers["Traffic"]){
+		RoadTravelConditionsActiveLayers["Traffic"] = false;
+		AddTrafficContent();
+	}
+	if(RoadTravelConditionsActiveLayers["Weather"]){
+		RoadTravelConditionsActiveLayers["Weather"] = false
+		AddWeatherContent(true);
+	}
+	LogAnalyticsEvent('Layer', 'RTC', 'SELECT');
+	//document.getElementById("accordion").scrollTo({top:0,behavior: 'smooth'});
+	//document.getElementById("accordion").scrollTop = 0;
+	setURLAndCookies();
+}
+function ActivateForecastWeatherTab() {
+	var tab = document.getElementById("ForecastWeather");
+	if (tab.className.search("active") >= 0) {
+		closeAllactiveTabs("");
+		return
+	}
+	closeAllactiveTabs("ForecastWeather");
+	//scrollintoview(tab)
+	tab.className += " active";
+	var tabcontent = tab.getElementsByClassName("accordion-content")[0];
+	tabcontent.style.maxHeight = (20 + tabcontent.getElementsByClassName("accordion-height")[0].clientHeight) + "px"; 
+	if(MenuVariable == "ForecastWeather")
+		return;
+	MenuVariable = "ForecastWeather";
+	RemoveAllActiveTabs();
+	document.getElementById("timeitem").className="";
+	document.getElementById("time").onchange();
+	LogAnalyticsEvent('Layer', 'Forecast', 'SELECT');
+	//document.getElementById("accordion").scrollTo({top:55,behavior: 'smooth'});
+	//document.getElementById("accordion").scrollTop = 55;
+	setURLAndCookies();
+}
+function ActivateCurrentWeatherTab() {
+	var tab = document.getElementById("CurrentWeather");
+	if (tab.className.search("active") >= 0) {
+		closeAllactiveTabs("");
+		return
+	}
+	closeAllactiveTabs("CurrentWeather");
+	//scrollintoview(tab)
+	tab.className += " active";
+	var tabcontent = tab.getElementsByClassName("accordion-content")[0];
+	tabcontent.style.maxHeight = (20 + tabcontent.getElementsByClassName("accordion-height")[0].clientHeight) + "px";
+	if(MenuVariable == "CurrentWeather")
+		return;
+	MenuVariable = "CurrentWeather";
+	RemoveAllActiveTabs()
+	if(CurrentWeatherLayer == null){
+		CurrentWeatherLayer = "CurrentAirTemperature"; //sets defualt layer
+	}
+	Button = document.getElementById(CurrentWeatherLayer);
+	if(Button.className == "menuitem"){
+		CurrentWeatherLayer = null;
+		Button.click();
+	}
+	LogAnalyticsEvent('Layer', 'Current', 'SELECT');
+	//document.getElementById("accordion").scrollTo({top:120,behavior: 'smooth'});
+	//document.getElementById("accordion").scrollTop = 120;
+	setURLAndCookies();
+}
+function ActivateFireTab() {
+	var tab = document.getElementById("Fire");
+	if (tab.className.search("active") >= 0) {
+		closeAllactiveTabs("");
+		return
+	}
+	closeAllactiveTabs("Fire");
+	//scrollintoview(tab)
+	tab.className += " active";
+	var tabcontent = tab.getElementsByClassName("accordion-content")[0];
+	tabcontent.style.maxHeight = (20 + tabcontent.getElementsByClassName("accordion-height")[0].clientHeight) + "px"; 
+	if(MenuVariable == "Fire")
+		return;
+	MenuVariable = "Fire";
+	RemoveAllActiveTabs()
+	if(FireLayer == null){
+		FireLayer = "FireIncidents";//default layer will be firedetectors
+	}
+	firebutton = document.getElementById(FireLayer);
+	if(firebutton.className == "menuitem"){
+		FireLayer = null;
+		firebutton.click();
+	}
+	
+	LogAnalyticsEvent('Layer', 'Fire', 'SELECT');
+	//document.getElementById("accordion").scrollTo({top:185,behavior: 'smooth'});
+	//document.getElementById("accordion").scrollTop = 185;
+	setURLAndCookies();
+}
+function ActivateOtherInfoTab() {
+	var tab = document.getElementById("OtherInfo");
+	if (tab.className.search("active") >= 0) {
+		closeAllactiveTabs("");
+		return
+	}
+	closeAllactiveTabs("OtherInfo");
+	//scrollintoview(tab)
+	tab.className += " active";
+	var tabcontent = tab.getElementsByClassName("accordion-content")[0];
+	tabcontent.style.maxHeight = (20 + tabcontent.getElementsByClassName("accordion-height")[0].clientHeight) + "px";
+	if(MenuVariable == "OtherInfo")
+		return;
+	MenuVariable = "OtherInfo";
+	RemoveAllActiveTabs();
+	OtherInfoMarkersGenerated = {	RestAreas:false,
+									FeaturesOfInterest:false, 
+									TruckScales:false,
+									SummitLocations:false};
+	groupindex = 0;
+	if(OtherInfoActiveLayers["RestAreas"] == true){
+		OtherInfoActiveLayers["RestAreas"] = false;
+		AddRestAreasContent("RestAreas");
+	}
+	if(OtherInfoActiveLayers["FeaturesOfInterest"] == true){
+		OtherInfoActiveLayers["FeaturesOfInterest"] = false;
+		AddFeaturesOfInterestContent("FeaturesOfInterest");
+	}
+	if(OtherInfoActiveLayers["TruckScales"] == true){
+		OtherInfoActiveLayers["TruckScales"] = false;
+		AddTruckScalesContent("TruckScales");
+	}
+	if(OtherInfoActiveLayers["SummitLocations"] == true){
+		OtherInfoActiveLayers["SummitLocations"] = false;
+		AddSummitLocationsContent("SummitLocations");
+	}
+	setLegend("otherinfo");
+	LogAnalyticsEvent('Layer', 'Other', 'SELECT');
+	//document.getElementByI,1000d;("accordion").scrollTo({top:250,behavior: 'smooth'});
+	//document.getElementById("accordion").scrollTop = 250;
+	setURLAndCookies();
+}
+function ActivateAboutTab(){
+	var tab = document.getElementById("About");
+	if (tab.className.search("active") >= 0) {
+		closeAllactiveTabs("");
+		return
+	}
+	closeAllactiveTabs("About");
+	//scrollintoview(tab)
+	tab.className += " active";
+	var tabcontent = tab.getElementsByClassName("accordion-content")[0];
+	tabcontent.style.maxHeight = (20 + tabcontent.getElementsByClassName("accordion-height")[0].clientHeight) + "px"; 
+	LogAnalyticsEvent('Layer', 'Help', 'SELECT');
+}
+
+function setLegend(legend){ // sets the legend
+	LegendVar = legend;
+	resetLegend();
+}
+
+function resetLegend(){ // makes sure the correct legend is shown(small or not)
+	legend = LegendVar
+	legends = {
+		temp: "/icons/Legends/temp.png",
+		Humidity: "/icons/Legends/Humidity.png",
+		precip: "/icons/Legends/precip.png",
+		wind: "/icons/Legends/wind.png",
+		sky: "/icons/Legends/sky.png",
+		pop12: "/icons/Legends/pop12.png",
+		snow: "/icons/Legends/snow.png",
+		tempsmall: "/icons/Legends/tempsmall.png",
+		Humiditysmall: "/icons/Legends/Humiditysmall.png",
+		precipsmall: "/icons/Legends/precipsmall.png",
+		windsmall: "/icons/Legends/windsmall.png",
+		skysmall: "/icons/Legends/skysmall.png",
+		pop12small: "/icons/Legends/pop12small.png",
+		snowsmall: "/icons/Legends/snowsmall.png",
+		wx: "/icons/Legends/wx.png",
+		FireIncd: "/icons/Legends/FireIncd.png",
+		FireDet: "/icons/Legends/FireDet.png",
+		RoadTravelConditions: "/icons/Legends/RoadTravelConditions.png",
+		RoadTravelConditionssmall: "/icons/Legends/RoadTravelConditionssmall.png",
+		otherinfo: "/icons/Legends/OtherInfo.png"
+	}
+	if(window.innerWidth <= 550 && legends[legend + "small"]){
+		legend = legend += "small";
+	}
+	url = legends[legend];
+	legendimg = document.getElementById("legendImage");
+	legendimg.src = url;
+	timeObj = document.getElementById("timeitem");
+	if(legend == "wx"){ //used to move the time selector up if the legend is wx
+		timeObj.setAttribute("wx",true);
+	}
+	else if(MenuVariable == "ForecastWeather"){
+		timeObj.setAttribute("wx",false);
+	}
+}
+
+function opencloseLegend(){
+	legendContainer = document.getElementById("legendContainer");
+	if(LegendVariable){
+		legendContainer.className="collapsed";
+		LegendVariable = false;
+	} else {
+		legendContainer.className="";
+		LegendVariable = true;
+	}
+}
+
+function openNav() {
+	document.getElementById("menu").className += " open";
+}
+
+function closeNav() {
+	document.getElementById("menu").className = "menu";
+}
+
+window.onresize = function(e){
+	resetLegend();
+}
+
+document.addEventListener('touchmove', function (event) {
+  if (event.scale !== 1) { event.preventDefault(); }
+}, { passive: false });
+//******************************* End Menu Controls *********************************************//
+</script>
+<script>
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+    if (window.location.hostname.endsWith("weathershare.org")) {
+		// Production
+		ga('create', 'UA-15870020-16', 'auto');
+	}
+	else {
+		// Development
+		ga('create', 'UA-15870020-14', 'auto');
+	}
+	ga('send', 'pageview', location.pathname);
+</script>
+</head>
+<body onload="LoadJSON(); setTimeout(function() {LogAnalyticsEvent('Reload', '', window.location.href); window.location.reload(true);}, 1800000);">
+<div id="banner-div" style="position: fixed; z-index: -1; top: 0px; left: 0px;" role="banner" aria-label="banner-div"><h1>One-Stop-Shop for Rural Traveler Information</h1></div>
+<div id="splash-panel" class="splash scroll" role="complementary" aria-label="splash-panel">Welcome to the One-Stop-Shop (OSS).<br>OSS works best with 4G or 5G cellular, or high-speed wi-fi.<br>Please wait while we download up-to-date traveler information to your device ...<br></div>
+<div id="image-modal" class="modal" onclick="closemodal();"><div id="modal-content" class="modal-content"></div></div>
+
+<div id="menu" class="menu" role="navigation" aria-label="navmenu">
+	<div id="close" class="closeMenu" onclick="LogAnalyticsEvent('UI', 'Menu', 'CLOSE');closeNav();"><div title='Close Menu' class="arrow"></div><img class="menuLogo" title='WSRTC' src="/icons/UI/WSRTC.png" alt="WSRTC"></div>
+	<div id="accordion" class="accordion scroll">
+		<div title='Open Road/Travel Conditions Layers' id="RoadTravelConditions" class="accordion-section active">
+			<div id="RoadTravelConditionsTab" class="accordion-header" onclick="ActivateRoadTravelConditionsTab()">Road/Travel Conditions</div>
+			<div class="accordion-content" style="max-height: 500px">
+				<div class ="accordion-height">
+					<div title='Check/Uncheck All' id="All" class="menuitem" onclick="checkUncheckAll();"><div class="menutext"><label for="CheckAllButton">Check/Uncheck All</label></div><div class="checkbox"><input id="CheckAllButton" type="checkbox"/><div class="check"></div></div></div>
+					<div title='Chain Requirement' id="Chain" class="menuitem" onclick="AddChainContent();"><div class="icon"><img src="/icons/RoadTravelConditions/chain.png" alt="Chain Icon"></div><div class="menutext"><label for="ChainButton">Chain Requirement</label></div><div class="checkbox"><input id="ChainButton" type="checkbox"/><div class="check"></div></div></div>
+					<div title='Incidents' id="Incident" class="menuitem" onclick="AddIncidentContent();"><div class="icon"><img src="/icons/RoadTravelConditions/A.png" alt="Incident Icon"></div><div class="menutext"><label for="IncidentButton">Incidents</label></div><div class="checkbox"><input id="IncidentButton" type="checkbox"/><div class="check"></div></div></div>
+					<div title='CMS' id="CMS" class="menuitem" onclick="AddCMSContent();"><div class="icon"><img src="/icons/RoadTravelConditions/cms.png" alt="CMS Icon"></div><div class="menutext"><label for="CMSButton">CMS</label></div><div class="checkbox"><input id="CMSButton" type="checkbox"/><div class="check"></div></div></div>
+					<div title='CCTV' id="CCTV" class="menuitem" onclick="AddCCTVContent();"><div class="icon"><img src="/icons/RoadTravelConditions/CCTV.png" alt="CCTV Icon"></div><div class="menutext"><label for="CCTVButton">CCTV</label></div><div class="checkbox"><input id="CCTVButton" type="checkbox"/><div class="check"></div></div></div>
+					<div title='RWIS' id="RWIS" class="menuitem" onclick="AddRWISContent();"><div class="icon"><img src="/icons/RoadTravelConditions/rwis.png" alt="RWIS Icon"></div><div class="menutext"><label for="RWISButton">RWIS</label></div><div class="checkbox"><input id="RWISButton" type="checkbox"/><div class="check"></div></div></div>
+					<div title='Road Information' id="RoadInfo" class="menuitem" onclick="AddRoadInfoContent();"><div class="icon"><img src="/icons/RoadTravelConditions/C.png" alt="Construction Icon"><img src="/icons/RoadTravelConditions/I.png" alt="Information Icon"><img src="/icons/RoadTravelConditions/CV.png" alt="Commercial Vehicle Information Icon"></div><div class="menutext"><label for="RoadInfoButton">Road Information</label></div><div class="checkbox"><input id="RoadInfoButton" type="checkbox"/><div class="check"></div></div></div>
+					<div title='Google Traffic' id="Traffic" class="menuitem" onclick="AddTrafficContent();"><div class="icon"><img src="/icons/UI/traffic.png" alt="Traffic Icon"></div><div class="menutext"><label for="TrafficButton">Google Traffic</label></div><div class="checkbox"><input id="TrafficButton" type="checkbox"/><div class="check"></div></div></div>
+					<div title='Weather' id="RoadTravelConditionsWeather" class="menuitem" onclick="AddWeatherContent(true);"><div class="icon"><img src="/icons/UI/Weather.png" alt="Weather Icon"></div><div class="menutext"><label for="WeatherButton">Weather</label></div><div class="checkbox"><input id="WeatherButton" type="checkbox" class="menuitemcheckbox"/><div class="check"></div></div></div>
+				</div>
+			</div>
+		</div>
+		<div title='Open Forecast Weather Layers' id="ForecastWeather" class="accordion-section">
+			<div id="ForecastWeatherTab" class="accordion-header" onclick="ActivateForecastWeatherTab()">Forecast Weather</div>
+			<div class="accordion-content">
+				<div class ="accordion-height">
+					<div title='Weather' id="Weather" class="menuitem" onclick="AddWeatherContent(false);"><div class="icon"></div><div class="menutext">Weather</div><div id="WeatherStatus" class="statusicon"></div></div>
+					<div title='Air Temperature' id="ForecastAirTemperature" class="menuitem" onclick="AddForecastAirTemperatureContent();"><div class="icon"></div><div class="menutext">Air Temperature</div><div id="ForecastAirTemperatureStatus" class="statusicon"></div></div>
+					<div title='Wind Speed' id="WindSpeed" class="menuitem" onclick="AddWindSpeedContent();"><div class="icon"></div><div class="menutext">Wind Speed</div><div id="WindSpeedStatus" class="statusicon"></div></div>
+					<div title='Wind Gust Speed' id="WindGustSpeed" class="menuitem" onclick="AddWindGustSpeedContent();"><div class="icon"></div><div class="menutext">Wind Gust Speed</div><div id="WindGustSpeedStatus" class="statusicon"></div></div>
+					<div title='Humidity' id="ForecastHumidity" class="menuitem" onclick="AddForecastHumidityContent();"><div class="icon"></div><div class="menutext">Humidity</div><div id="ForecastHumidityStatus" class="statusicon"></div></div>
+					<div title='Sky Cover' id="SkyCover" class="menuitem" onclick="AddSkyCoverContent();"><div class="icon"></div><div class="menutext">Sky Cover</div><div id="SkyCoverStatus" class="statusicon"></div></div>
+					<div title='12-Hour Precipitation' id="Precipitation12hour" class="menuitem" onclick="AddPrecipitation12hourContent();"><div class="icon"></div><div class="menutext">12-Hour Precipitation</div><div id="Precipitation12hourStatus" class="statusicon"></div></div>
+					<div title='6-Hour Precipitation' id="Precipitation6hour" class="menuitem" onclick="AddPrecipitation6hourContent();"><div class="icon"></div><div class="menutext">6-Hour Precipitation</div><div id="Precipitation6hourStatus" class="statusicon"></div></div>
+					<div title='Snow' id="Snow" class="menuitem" onclick="AddSnowContent();"><div class="icon"></div><div class="menutext">Snow</div><div id="SnowStatus" class="statusicon"></div></div>
+				</div>
+			</div>
+		</div>
+		<!--<div title='Open Current Weather Layers' id="CurrentWeather" class="accordion-section">	
+			<div id="CurrentWeatherTab" class="accordion-header" onclick="ActivateCurrentWeatherTab()">Current Weather</div>
+			<div class="accordion-content">
+				<div class ="accordion-height">
+					<div title='Air Temperature' id="CurrentAirTemperature" class="menuitem" onclick="AddCurrentAirTemperatureContent();"><div class="icon"></div><div class="menutext">Air Temperature</div><div id="CurrentAirTemperatureStatus" class="statusicon"></div></div>
+					<div title='Relative Humidity' id="Humidity" class="menuitem" onclick="AddHumidityContent();"><div class="icon"></div><div class="menutext">Relative Humidity</div><div id="HumidityStatus" class="statusicon"></div></div>
+					<div title='1 Hour Precipitation' id="Precipitation1hour" class="menuitem" onclick="AddPrecipitation1hourContent();"><div class="icon"></div><div class="menutext">1 Hour Precipitation</div><div id="Precipitation1hourStatus" class="statusicon"></div></div>
+					<div title='24 Hour Precipitation' id="Precipitationt24hour" class="menuitem" onclick="AddPrecipitationt24hourContent();"><div class="icon"></div><div class="menutext">24 Hour Precipitation</div><div id="Precipitationt24hourStatus" class="statusicon"></div></div>
+					<div title='AHPS 24 hr Precip.' id="AHPS" class="menuitem" onclick="AddAHPSContent();"><div class="icon"></div><div class="menutext">AHPS 24 hr Precip.</div><div id="AHPSStatus" class="statusicon"></div></div>
+					<div title='Wind' id="Wind" class="menuitem" onclick="AddWindContent();"><div class="icon"></div><div class="menutext">Wind</div><div id="WindStatus" class="statusicon"></div></div>
+				</div>
+			</div>
+		</div>-->
+		<div title='Open Fire Layers' id="Fire" class="accordion-section">
+			<div id="FireTab" class="accordion-header" onclick="ActivateFireTab()">Fire</div>
+			<div class="accordion-content">
+				<div class ="accordion-height">
+					<div title='Fire Incidents' id="FireIncidents" class="menuitem" onclick="AddFireIncidentsContent();"><div class="icon"></div><div class="menutext">Fire Incidents</div><div id="FireIncidentsStatus" class="statusicon"></div></div>
+					<div title='Fire Detectors' id="FireDetectors" class="menuitem" onclick="AddFireDetectorsContent();"><div class="icon"></div><div class="menutext">Fire Detections</div><div id="FireDetectorsStatus" class="statusicon"></div></div>
+				</div>
+			</div>
+		</div>
+		<div title='Open Other Info Layers' id="OtherInfo" class="accordion-section">		
+			<div id="OtherInfoTab" class="accordion-header" onclick="ActivateOtherInfoTab()">Other Info</div>
+			<div class="accordion-content">
+				<div class="accordion-height">
+					<div title='Rest Areas' id="RestAreas" class="menuitem" onclick="AddRestAreasContent();"><div class="icon"><img src="/icons/OtherInfo/rest-area.png" alt="Rest Area Icon"></div><div class="menutext"><label for="RestAreasCheck">Rest Areas</label></div><div class="checkbox"><input type="checkbox" id="RestAreasCheck" class="menuitemcheckbox"/><div class="check"></div></div></div>
+					<div title='Features of Interest' id="FeaturesOfInterest" class="menuitem" onclick="AddFeaturesOfInterestContent();"><div class="icon"><img src="/icons/OtherInfo/featuresofinterest.png" alt="Features of Interest Icon"></div><div class="menutext"><label for="FeaturesOfInterestCheck">Features of Interest</label></div><div class="checkbox"><input type="checkbox" id="FeaturesOfInterestCheck" class="menuitemcheckbox"/><div class="check"></div></div></div>
+					<div title='Truck Scales' id="TruckScales" class="menuitem" onclick="AddTruckScalesContent();"><div class="icon"><img src="/icons/OtherInfo/truck.png" alt="Truck Scales Icon"></div><div class="menutext"><label for="TruckScalesCheck">Truck Scales</label></div><div class="checkbox"><input type="checkbox" id="TruckScalesCheck" class="menuitemcheckbox"/><div class="check"></div></div></div>
+					<div title='Summit Locations' id="SummitLocations" class="menuitem" onclick="AddSummitLocationsContent();"><div class="icon"><img src="/icons/OtherInfo/summit.png" alt="Summit Icon"></div><div class="menutext"><label for="SummitLocationsCheck">Summit Locations</label></div><div class="checkbox"><input type="checkbox" id="SummitLocationsCheck" class="menuitemcheckbox"/><div class="check"></div></div></div>
+				</div>
+			</div>
+		</div>
+		<div title='Open Help Layers' id="About" class="accordion-section">	
+			<div id="AboutTab" class="accordion-header" onclick="ActivateAboutTab()">Help</div>
+			<div class="accordion-content">
+				<div class="accordion-height">
+					<div title='Demo Video' ><a href="https://www.youtube.com/embed/UPsNqbJ-m3w?autoplay=1" target="_blank" class="menuitem" onclick="LogAnalyticsEvent('Layer', 'Help_Video', 'SELECT');" ><div class="icon"></div><div class="menutext">Demo Video</div></a></div>
+					<div title='Feedback/Survey' ><a href="https://forms.gle/ykcWVfwk6GdysCC5A" target="_blank" class="menuitem" onclick="LogAnalyticsEvent('Layer', 'Help_Survey', 'SELECT');" ><div class="icon"></div><div class="menutext">Feedback/Survey</div></a></div>
+					<div title='Data and Links' ><a href="/OSSdataAndLinks.html" target="_blank" class="menuitem" onclick="LogAnalyticsEvent('Layer', 'Help_DataLinks', 'SELECT');"><div class="icon"></div><div class="menutext">Data and Links</div></a></div>
+					<div title='About' ><a href="http://www.westernstates.org/Projects/OSS/" target="_blank" class="menuitem" onclick="LogAnalyticsEvent('Layer', 'Help_About', 'SELECT');"><div class="icon"></div><div class="menutext">About</div></a></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="hamburgerIcon" class="hamburger" onclick="LogAnalyticsEvent('UI', 'Menu', 'OPEN');openNav();" role="navigation" aria-label="hamburgerIcon">
+	<img alt='Menu and Layers' title='Menu and Layers' src="/icons/UI/layers.png" width="35" alt="Menu">
+</div>
+<div id="legendContainer" class="legendContainer" role="complementary" aria-label="legendContainer">
+	<div id="legend">
+		<img id="legendImage" src="/icons/Legends/RoadTravelConditions.png" alt="">
+		<div title='Open/Close Legend' id="legendButton" onclick="opencloseLegend();">Legend</div>
+	</div>
+</div>
+<div id="timeitem" class="closed" wx="false" role="navigation" aria-label="timeitem">
+	<div class="timecontainer">
+		<div title='Decrement Forecast Time' id="previousTimeButton" class="timebutton" onclick="decTime();">&lt;</div>
+		<select title="Select Forecast Time" id="time" class="time" onchange="AddWeatherContent(false);" aria-label="Select Forecast Time"></select>
+		<div title='Increment Forecast Time' id="nextTimeButton" class="timebutton" onclick="incTime();">&gt;</div>
+	</div>
+</div>
+<div id="map" role="main" aria-label="map"></div>
+<!-- Replace the value of the key parameter with your own API key. -->
+<!--<script async defer src="https://maps.googleapis.com/maps/api/js?callback=initMap"></script>-->
+<!--<script async defer src="https://maps.googleapis.com/maps/api/js?client=gme-californiatechnology1&callback=initMap"></script>-->
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDYRbGffqBHAI5FFA9STCjHw8YcyiAfyt4&callback=initMap"></script>
+<!-- The following script was used with a previous version of the AddThis feature -->
+<!--<script >var addthis_config = {"data_track_addressbar":true};
+	var addthis_share = {
+		url: window.location.href
+	};
+</script>-->
+<!-- Go to www.addthis.com/dashboard to customize your tools -->
+<!--<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-50b69ccd50634cf9"></script>-->
+</body>
+</html>
