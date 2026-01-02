@@ -2,6 +2,8 @@
 
 Files related to the One Stop Shop Senior Project for Dr. Galarus at Montana Tech. This project is meant to show Google maps API can be replaced with a free, open source alternative, leaflet.js.
 
+The project was created by Brady Schiff (me), Alex Thompson, and James Brady.
+
 This README documents the project layout and how to run it locally.
 
 Files and purpose
